@@ -1,5 +1,5 @@
 {
-    "name": "vreap/entity-attribute-value-model",
+    "name": "v-reap/entity-attribute-value-model",
     "description": "Entity–attribute–value model (EAV) for laravel",
     "type": "library",
     "keywords": ["laravel", "Entity attribute value", "EAV", "model"],
