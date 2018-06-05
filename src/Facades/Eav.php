@@ -5,12 +5,8 @@ namespace Vreap\Eav\Facades;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * Class Admin.
+ * Class Eav.
  *
- * @method static \Vreap\Eav\Grid grid($model, \Closure $callable)
- * @method static \Vreap\Eav\Form form($model, \Closure $callable)
- * @method static \Vreap\Eav\Tree tree($model, \Closure $callable = null)
- * @method static \Vreap\Eav\Layout\Content content(\Closure $callable = null)
  * @method static \Illuminate\Contracts\View\Factory|\Illuminate\View\View|void css($css = null)
  * @method static \Illuminate\Contracts\View\Factory|\Illuminate\View\View|void js($js = null)
  * @method static \Illuminate\Contracts\View\Factory|\Illuminate\View\View|void script($script = '')
