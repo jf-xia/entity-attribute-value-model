@@ -1,5 +1,5 @@
 <?php
-namespace Vreap\Eav\Models\Task;
+namespace Eav\Models\Task;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -50,7 +50,7 @@ class Value extends Model
      **/
     public function task()
     {
-        return $this->belongsTo(\Vreap\Eav\Models\Task\Task::class, 'task_id', 'id');
+        return $this->belongsTo(\Eav\Models\Task\Task::class, 'task_id', 'id');
     }
 
     /**
@@ -58,7 +58,7 @@ class Value extends Model
      **/
     public function attribute()
     {
-        return $this->belongsTo(\Vreap\Eav\Models\Task\Attribute::class, 'attribute_id', 'id');
+        return $this->belongsTo(\Eav\Models\Task\Attribute::class, 'attribute_id', 'id');
     }
 
     public function getFieldHtml($customHtml)

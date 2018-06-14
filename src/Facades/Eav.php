@@ -1,6 +1,6 @@
 <?php
 
-namespace Vreap\Eav\Facades;
+namespace Eav\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
@@ -20,6 +20,6 @@ class Eav extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return \Vreap\Eav\Eav::class;
+        return \Eav\Eav::class;
     }
 }

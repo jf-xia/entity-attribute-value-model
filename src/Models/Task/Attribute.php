@@ -1,6 +1,6 @@
 <?php
 
-namespace Vreap\Eav\Models\Task;
+namespace Eav\Models\Task;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -77,7 +77,7 @@ class Attribute extends Model
      **/
     public function type()
     {
-        return $this->belongsTo(\Vreap\Eav\Models\Task\Type::class, 'type_id', 'id');
+        return $this->belongsTo(\Eav\Models\Task\Type::class, 'type_id', 'id');
     }
 
     /**
@@ -85,12 +85,12 @@ class Attribute extends Model
      **/
     public function user()
     {
-        return $this->belongsTo(\Vreap\Eav\Auth\Database\Administrator::class, 'user_id', 'id');
+        return $this->belongsTo(\Eav\Auth\Database\Administrator::class, 'user_id', 'id');
     }
 
     public function value()
     {
-        return $this->hasMany(\Vreap\Eav\Models\Task\Value::class, 'attribute_id', 'id');
+        return $this->hasMany(\Eav\Models\Task\Value::class, 'attribute_id', 'id');
     }
 
     public function getListHtml($value)

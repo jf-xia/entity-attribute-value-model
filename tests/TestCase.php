@@ -20,12 +20,12 @@ class TestCase extends BaseTestCase
 
         $app->booting(function () {
             $loader = \Illuminate\Foundation\AliasLoader::getInstance();
-            $loader->alias('Eav', \Vreap\Eav\Facades\Eav::class);
+            $loader->alias('Eav', \Eav\Facades\Eav::class);
         });
 
         $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
 
-        $app->register('Vreap\Eav\EavServiceProvider');
+        $app->register('Eav\EavServiceProvider');
 
         return $app;
     }

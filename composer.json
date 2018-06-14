@@ -21,7 +21,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Vreap\\Eav\\": "src/"
+            "Eav\\": "src/"
         },
         "files": [
             "src/helpers.php"
@@ -39,10 +39,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Vreap\\Eav\\EavServiceProvider"
+                "Eav\\EavServiceProvider"
             ],
             "aliases": {
-                "Eav": "Vreap\\Eav\\Facades\\Eav"
+                "Eav": "Eav\\Facades\\Eav"
             }
 
         }

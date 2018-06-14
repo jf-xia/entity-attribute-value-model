@@ -1,6 +1,10 @@
 <?php
 
 return [
+    
+    'entity' => [
+        
+    ]
 
     /*
      * database setting.

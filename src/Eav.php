@@ -1,6 +1,6 @@
 <?php
 
-namespace Vreap\Eav;
+namespace Eav;
 
 use Closure;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
@@ -66,7 +66,7 @@ class Eav
     {
         $attributes = [
             'prefix'     => config('admin.route.prefix'),
-            'namespace'  => 'Vreap\Eav\Controllers',
+            'namespace'  => 'Eav\Controllers',
             'middleware' => config('admin.route.middleware'),
         ];
 

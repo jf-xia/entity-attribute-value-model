@@ -1,10 +1,10 @@
 <?php
 
-namespace Vreap\Eav\Models\Task;
+namespace Eav\Models\Task;
 
 use Overtrue\LaravelWeChat\Facade as EasyWeChat;
-use Vreap\Eav\Auth\Database\Administrator;
-use Vreap\Eav\Facades\Admin;
+use Eav\Auth\Database\Administrator;
+use Eav\Facades\Admin;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
