@@ -1,0 +1,12 @@
+<?php
+
+namespace DummyNamespace;
+
+use Eav\Model;
+
+class DummyClass extends Model
+{
+    const ENTITY  = 'DummyEntity';
+
+    //
+}
