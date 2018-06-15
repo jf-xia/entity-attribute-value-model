@@ -22,11 +22,13 @@ class LaravelServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->registerCreator();
-         
-        $this->registerCommands();
-        
-        $this->mergeConfigFrom(__DIR__.'/../../config/eav.php', 'eav');
+        if ($this->app->runningInConsole()) {
+            $this->registerCreator();
+
+            $this->registerCommands();
+
+            $this->mergeConfigFrom(__DIR__.'/../../config/eav.php', 'eav');
+        }
     }
 
 
@@ -37,11 +39,13 @@ class LaravelServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->publishes([
-            __DIR__.'/../../config/eav.php' => config_path('eav.php'),
-        ], 'config');
-        
-        $this->loadMigrationsFrom(__DIR__.'/../../database/migrations/');
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__.'/../../config/eav.php' => config_path('eav.php'),
+            ], 'config');
+
+            $this->loadMigrationsFrom(__DIR__.'/../../database/migrations/');
+        }
     }
     
     /**

@@ -1,5 +1,17 @@
 <?php
 
+if (!function_exists('status')) {
+
+    /**
+     * Get status.
+     *
+     * @return array
+     */
+    function status()
+    {
+        return [0=>trans('eav::eav.disable'),1=>trans('eav::eav.enable')];
+    }
+}
 
 if (!function_exists('message_toastr')) {
 
