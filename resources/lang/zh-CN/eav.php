@@ -1,6 +1,22 @@
 <?php
 
 return [
+    'list'         => '列表',
+    'new'          => '新增',
+    'create'       => '创建',
+    'delete'       => '删除',
+    'remove'       => '移除',
+    'edit'         => '编辑',
+    'view'         => '查看',
+    'browse'       => '浏览',
+    'save'         => '保存',
+    'refresh'      => '刷新',
+    'close'        => '关闭',
+    'show'         => '显示',
+    'all'           => '全部',
+    'back'              => '返回',
+    'back_to_list'      => '返回列表',
+
     'entity'                        =>'业务实体',
     'entity_code'                   =>'业务代码',
     'entity_class'                  =>'类名',
@@ -11,9 +27,9 @@ return [
     'enable'                        =>'开启',
     'disable'                       =>'关闭',
 
-    'attribute'=>'属性',
+    'attributes'=>'属性',
     'attribute_code'=>'属性代码',
-    'backend_class'=>'前端类',
+    'backend_class'=>'后端类',
     'backend_type'=>'数据类型',
     'backend_table'=>'数据表',
     'frontend_class'=>'前端类',
@@ -21,9 +37,9 @@ return [
     'frontend_label'=>'前端标签',
     'source_class'=>'源标签',
     'default_value'=>'默认值',
-    'is_filterable'=>'可过滤',
-    'is_searchable'=>'可搜索',
-    'is_required'=>'是否必填',
+    'is_filterable'=>'过滤字段',
+    'is_searchable'=>'搜索字段',
+    'is_required'=>'必填字段',
     'required_validate_class'=>'验证类',
 
 ];

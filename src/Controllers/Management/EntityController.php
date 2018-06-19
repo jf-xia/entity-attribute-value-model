@@ -91,20 +91,22 @@ class EntityController extends Controller
                 ->options(AttributeSet::all()->pluck('attribute_set_name','attribute_set_id'));
 //            $form->column('additional_attribute_table',trans('eav::eav.additional_attribute_table'));
             $form->select('is_flat_enabled',trans('eav::eav.is_flat_enabled'))->options(status());
-            $form->hasMany('attributes', function (Form\NestedForm $form) {
-                $form->display('attribute_id', 'ID');
+            $form->subForm('attributes',trans('eav::eav.attributes'), function (Form\NestedForm $form) {
+//                $form->display('attribute_id', '');
                 $form->text('attribute_code',trans('eav::eav.attribute_code'));
                 $form->text('backend_class',trans('eav::eav.backend_class'));
-                $form->text('backend_type',trans('eav::eav.backend_type'));
+                $form->select('backend_type',trans('eav::eav.backend_type'))
+                    ->options(['','static'=>'字段','int'=>'整数','varchar'=>'字符串',
+                        'text'=>'大文本','decimal'=>'浮点数','datetime'=>'时间']);
                 $form->text('backend_table',trans('eav::eav.backend_table'));
                 $form->text('frontend_class',trans('eav::eav.frontend_class'));
-                $form->text('frontend_type',trans('eav::eav.frontend_type'));
+                $form->select('frontend_type',trans('eav::eav.frontend_type'))->options(Attribute::frontendType());
                 $form->text('frontend_label',trans('eav::eav.frontend_label'));
                 $form->text('source_class',trans('eav::eav.source_class'));
                 $form->text('default_value',trans('eav::eav.default_value'));
-                $form->text('is_filterable',trans('eav::eav.is_filterable'));
-                $form->text('is_searchable',trans('eav::eav.is_searchable'));
-                $form->text('is_required',trans('eav::eav.is_required'));
+                $form->select('is_filterable',trans('eav::eav.is_filterable'))->options(status());
+                $form->select('is_searchable',trans('eav::eav.is_searchable'))->options(status());
+                $form->select('is_required',trans('eav::eav.is_required'))->options(status());
                 $form->text('required_validate_class',trans('eav::eav.required_validate_class'));
             });
         });

@@ -14,9 +14,9 @@ class Entity extends Model
     protected static $entityIdCache = [];
     
     protected $fillable = [
-        'entity_code', 'entity_class', 'entity_table',
+        'entity_code', 'entity_name', 'entity_class', 'entity_table',
         'default_attribute_set_id', 'additional_attribute_table',
-        'is_flat_enabled'
+        'is_flat_enabled', 'entity_desc'
     ];
     
     public $timestamps = false;
