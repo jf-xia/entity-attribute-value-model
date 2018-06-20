@@ -11,14 +11,9 @@ Route::group([
     'namespace'     => config('eav.route.namespace'),
     'middleware'    => config('eav.route.middleware'),
 ], function (Router $router) {
-//'index', 'create', 'store', 'show', 'edit', 'update', 'destroy'
-    $router->get('/b/{entity}', 'LadminController@index');
-    $router->post('/b/{entity}', 'LadminController@store');
-    $router->get('/b/{entity}/create', 'LadminController@create');
-    $router->get('/b/{entity}/{id}', 'LadminController@show');
-    $router->get('/b/{entity}/{id}/edit', 'LadminController@edit');
-    $router->post('/b/{entity}/{id}', 'LadminController@update');
-    $router->post('/b/{entity}/{id}', 'LadminController@destroy');
+    foreach (\Eav\Entity::all() as $entity) {
+        $router->resource($entity->entity_code, 'LadminController');
+    }
     $router->resource('/entity', 'EntityController');
     $router->resource('/attribute', 'AttributeController');
 

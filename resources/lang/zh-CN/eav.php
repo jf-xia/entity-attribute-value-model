@@ -18,6 +18,7 @@ return [
     'back_to_list'      => '返回列表',
 
     'entity'                        =>'业务实体',
+    'entity_name'                   =>'业务名称',
     'entity_code'                   =>'业务代码',
     'entity_class'                  =>'类名',
     'entity_table'                  =>'表名',
@@ -41,5 +42,7 @@ return [
     'is_searchable'=>'搜索字段',
     'is_required'=>'必填字段',
     'required_validate_class'=>'验证类',
+    'static'=>'字段','int'=>'整数','varchar'=>'字符串',
+    'text'=>'大文本','decimal'=>'浮点数','datetime'=>'时间',
 
 ];

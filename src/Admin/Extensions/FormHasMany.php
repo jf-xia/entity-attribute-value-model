@@ -30,6 +30,8 @@ class FormHasMany extends Field
      */
     protected $builder = null;
 
+    protected $nestedForm = null;
+
     /**
      * Form data.
      *
@@ -418,6 +420,12 @@ $('#has-many-{$this->column}').on('click', '.remove', function () {
     $(this).closest('.has-many-{$this->column}-form').find('.$removeClass').val(1);
 });
 
+$("#attr-option-modal .submit").click(function () {
+    $("#attr-option-modal").modal('toggle');
+    $('body').removeClass('modal-open');
+    $('.modal-backdrop').remove();
+});
+
 EOT;
 
         Admin::script($script);
@@ -490,15 +498,22 @@ EOT;
         // specify a view to render.
         $this->view = $this->views[$this->viewMode];
 
-        list($template, $script) = $this->buildNestedForm($this->column, $this->builder)
-            ->getTemplateHtmlAndScript();
+        $scripts = [];
+        $this->nestedForm = $this->buildNestedForm($this->column, $this->builder);
+        /* @var Field $field */
+        foreach ($this->nestedForm->fields() as $field) {
+            if ($field->getScript()) {
+                $scripts[] = array_pop(Admin::$script);
+            }
+        }
 
-        $this->setupScript($script);
+        $this->setupScript(implode("\r\n", $scripts));
 
         return parent::render()->with([
             'forms'        => $this->buildRelatedForms(),
-            'template'     => $template,
             'relationName' => $this->relationName,
+            'nestedForm' => $this->nestedForm,
+            'action' => '',
         ]);
     }
 }

@@ -13,20 +13,20 @@ use Encore\Admin\Grid;
 use Encore\Admin\Layout\Column;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
-use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Route;
 
 class LadminController extends Controller
 {
     use ModelForm;
-    private $entityId;
+    private $entityCode;
     private $entity;
 
     public function __construct()
     {
-        $this->entityId = Request::route('id');
-        $this->entity = Entity::findByCode(Request::route('entity'));
+        $this->entityCode = explode('.',Route::currentRouteName())[0];
+        $this->entity = Entity::findByCode($this->entityCode);
         if(empty($this->entity)){
             abort(404);
         }
@@ -53,15 +53,12 @@ class LadminController extends Controller
         return Attribute::where('entity_id',$this->entity->entity_id)->get();
     }
 
-    public function edit()
+    public function edit($id)
     {
-        if(empty($this->entityId)){
-            abort(404);
-        }
         $content = Admin::content();
         $content->header($this->entity->entity_name.trans('eav::eav.edit'));
         $content->description($this->entity->entity_desc);
-        $content->body($this->form()->edit($this->entityId));
+        $content->body($this->form()->edit($id));
         return $content;
     }
 
@@ -82,7 +79,7 @@ class LadminController extends Controller
     protected function form()
     {
         return Admin::form($this->entity->entity_class, function (Form $form) {
-            $form->id('ID');
+            $form->id('id','ID');
             foreach ($this->attrs() as $attr) {
                 $form->{$attr->frontend_type}($attr->attribute_code,$attr->frontend_label);
             }

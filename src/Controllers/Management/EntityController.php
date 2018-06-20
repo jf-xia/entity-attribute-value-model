@@ -19,13 +19,14 @@ class EntityController extends Controller
     public function index()
     {
         $content = Admin::content();
-        $content->header(trans('eav::eav.entity'));
+        $content->header(trans('eav::eav.entity').trans('eav::eav.list'));
         $content->description('...');
         $entity = Entity::first();
         //$entity->describe()->pluck('DATA_TYPE','COLUMN_NAME')
 //        dd($entity->attributeSet->toArray());
         $content->body(Admin::grid(Entity::class, function (Grid $grid) {
             $grid->column('entity_id', 'ID')->sortable();
+            $grid->column('entity_name',trans('eav::eav.entity_name'));
             $grid->column('entity_code',trans('eav::eav.entity_code'));
             $grid->column('entity_class',trans('eav::eav.entity_class'));
             $grid->column('entity_table',trans('eav::eav.entity_table'));
@@ -54,7 +55,7 @@ class EntityController extends Controller
     public function edit($id)
     {
         return Admin::content(function (Content $content) use ($id) {
-            $content->header(trans('eav::eav.entity'));
+            $content->header(trans('eav::eav.edit').trans('eav::eav.entity'));
             $content->description('...');
 
             $content->body($this->form()->edit($id));
@@ -69,7 +70,7 @@ class EntityController extends Controller
     public function create()
     {
         return Admin::content(function (Content $content) {
-            $content->header(trans('task.Create'));
+            $content->header(trans('eav::eav.create').trans('eav::eav.entity'));
             $content->description('...');
             $content->body($this->form());
         });
@@ -84,9 +85,10 @@ class EntityController extends Controller
     {
         return Admin::form(Entity::class, function (Form $form) {
             $form->display('entity_id', 'ID');
-            $form->text('entity_code',trans('eav::eav.entity_code'));
-            $form->text('entity_class',trans('eav::eav.entity_class'));
-            $form->text('entity_table',trans('eav::eav.entity_table'));
+            $form->text('entity_name',trans('eav::eav.entity_name'));//->rules('required|unique:entities');
+            $form->text('entity_code',trans('eav::eav.entity_code'));//->rules('required|unique:entities');
+            $form->text('entity_class',trans('eav::eav.entity_class'));//->rules('required|unique:entities');
+            $form->text('entity_table',trans('eav::eav.entity_table'));//->rules('required|unique:entities');
             $form->select('default_attribute_set_id',trans('eav::eav.default_attribute_set_id'))
                 ->options(AttributeSet::all()->pluck('attribute_set_name','attribute_set_id'));
 //            $form->column('additional_attribute_table',trans('eav::eav.additional_attribute_table'));
@@ -95,9 +97,7 @@ class EntityController extends Controller
 //                $form->display('attribute_id', '');
                 $form->text('attribute_code',trans('eav::eav.attribute_code'));
                 $form->text('backend_class',trans('eav::eav.backend_class'));
-                $form->select('backend_type',trans('eav::eav.backend_type'))
-                    ->options(['','static'=>'字段','int'=>'整数','varchar'=>'字符串',
-                        'text'=>'大文本','decimal'=>'浮点数','datetime'=>'时间']);
+                $form->select('backend_type',trans('eav::eav.backend_type'))->options(Attribute::backendType());
                 $form->text('backend_table',trans('eav::eav.backend_table'));
                 $form->text('frontend_class',trans('eav::eav.frontend_class'));
                 $form->select('frontend_type',trans('eav::eav.frontend_type'))->options(Attribute::frontendType());

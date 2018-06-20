@@ -20,6 +20,13 @@ class Entity extends Model
     ];
     
     public $timestamps = false;
+
+    public static $rules = [
+        'entity_code' => 'required|unique:entities',
+        'entity_name' => 'required|unique:entities',
+        'entity_class' => 'required|unique:entities',
+        'entity_table' => 'required|unique:entities',
+    ];
     
     public function canUseFlat()
     {

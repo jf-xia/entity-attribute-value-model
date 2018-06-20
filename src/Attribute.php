@@ -432,6 +432,13 @@ class Attribute extends Model
             ->updateOrInsert($attributes, ['value' => $value]);
     }
 
+    public static function backendType()
+    {
+        return ['','static'=>trans('eav::eav.static'),'int'=>trans('eav::eav.int'),
+            'varchar'=>trans('eav::eav.varchar'),'text'=>trans('eav::eav.text'),
+            'decimal'=>trans('eav::eav.decimal'),'datetime'=>trans('eav::eav.datetime')];
+    }
+
     public static function frontendType()
     {
         return ['button'=>'button',
