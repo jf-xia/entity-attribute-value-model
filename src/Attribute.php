@@ -27,28 +27,28 @@ class Attribute extends Model
     /**
      * Entity instance
      *
-     * @var Eav\Entity
+     * @var \Eav\Entity
      */
     protected $entity;
 
     /**
      * Backend instance
      *
-     * @var Eav\Attribute\Backend
+     * @var \Eav\Attribute\Backend
      */
     protected $backend;
 
     /**
      * Frontend instance
      *
-     * @var Eav\Attribute\Frontend
+     * @var \Eav\Attribute\Frontend
      */
     protected $frontend;
 
     /**
      * Source instance
      *
-     * @var Eav\Attribute\Source
+     * @var \Eav\Attribute\Source
      */
     protected $source;
 
@@ -80,7 +80,7 @@ class Attribute extends Model
     /**
      * Set attribute entity instance
      *
-     * @param Eav\Entity $entity
+     * @param \Eav\Entity $entity
      * @return $this
      */
     public function setEntity($entity)
@@ -233,7 +233,7 @@ class Attribute extends Model
     /**
      * Retrieve entity instance
      *
-     * @return Eav\Entity
+     * @return \Eav\Entity
      */
     public function getEntity()
     {
@@ -256,7 +256,7 @@ class Attribute extends Model
     /**
      * Retrieve backend instance
      *
-     * @return Eav\Attribute\Backend
+     * @return \Eav\Attribute\Backend
      */
     public function getBackend()
     {
@@ -279,7 +279,7 @@ class Attribute extends Model
     /**
      * Retrieve frontend instance
      *
-     * @return Eav\Attribute\Frontend
+     * @return \Eav\Attribute\Frontend
      */
     public function getFrontend()
     {
@@ -302,7 +302,7 @@ class Attribute extends Model
     /**
      * Retrieve source instance
      *
-     * @return Eav\Attribute\Source
+     * @return \Eav\Attribute\Source
      */
     public function getSource()
     {

@@ -16,6 +16,7 @@ Route::group([
     }
     $router->resource('/entity', 'EntityController');
     $router->resource('/attribute', 'AttributeController');
+    $router->resource('/attributeset', 'AttributeSetController');
 
 });
 

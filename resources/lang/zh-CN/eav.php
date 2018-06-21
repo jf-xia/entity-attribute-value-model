@@ -28,6 +28,8 @@ return [
     'enable'                        =>'开启',
     'disable'                       =>'关闭',
 
+    'attribute_set_id'      =>'属性集',
+
     'attributes'=>'属性',
     'attribute_code'=>'属性代码',
     'backend_class'=>'后端类',

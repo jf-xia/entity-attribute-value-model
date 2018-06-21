@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AttributeSet extends Model
 {
+
     protected $primaryKey = 'attribute_set_id';
     
     public $timestamps = false;
@@ -13,7 +14,7 @@ class AttributeSet extends Model
     protected $fillable = [
         'attribute_set_name' , 'entity_id'
     ];
-    
+
     public function attributes()
     {
         return $this->hasManyThrough(Attribute::class, EntityAttribute::class, 'attribute_set_id', 'attribute_id');
@@ -23,4 +24,5 @@ class AttributeSet extends Model
     {
         return $this->hasMany(AttributeGroup::class, 'attribute_set_id');
     }
+
 }

@@ -3,6 +3,7 @@
 namespace Eav;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class EntityAttribute extends Model
 {
