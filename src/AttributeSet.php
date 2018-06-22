@@ -19,6 +19,11 @@ class AttributeSet extends Model
     {
         return $this->hasManyThrough(Attribute::class, EntityAttribute::class, 'attribute_set_id', 'attribute_id');
     }
+
+    public function entity()
+    {
+        return $this->belongsTo(Entity::class, 'entity_id', 'entity_id');
+    }
     
     public function attributeGroup()
     {

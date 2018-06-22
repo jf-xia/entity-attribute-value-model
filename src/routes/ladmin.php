@@ -17,6 +17,10 @@ Route::group([
     $router->resource('/entity', 'EntityController');
     $router->resource('/attribute', 'AttributeController');
     $router->resource('/attributeset', 'AttributeSetController');
+    $router->any('/attr/set', 'AttributeSetController@attrSetStore');
+    $router->get('/attr/set/{id}', 'AttributeSetController@attrSetDelete');
+    $router->any('/attr/group', 'AttributeSetController@attrGroupStore');
+    $router->get('/attr/group/{id}', 'AttributeSetController@attrGroupDelete');
 
 });
 

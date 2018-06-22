@@ -16,8 +16,12 @@ return [
     'all'           => '全部',
     'back'              => '返回',
     'back_to_list'      => '返回列表',
+    'action'            => '操作',
+    'order'            => '排序',
+
 
     'entity'                        =>'业务实体',
+    'entity_id'                        =>'业务实体',
     'entity_name'                   =>'业务名称',
     'entity_code'                   =>'业务代码',
     'entity_class'                  =>'类名',
@@ -28,7 +32,13 @@ return [
     'enable'                        =>'开启',
     'disable'                       =>'关闭',
 
+    'attribute_set'      =>'属性集',
     'attribute_set_id'      =>'属性集',
+    'attribute_set_name'      =>'集名称',
+
+    'attribute_group'      =>'属性组',
+    'attribute_group_id'      =>'属性组ID',
+    'attribute_group_name'      =>'组名称',
 
     'attributes'=>'属性',
     'attribute_code'=>'属性代码',
