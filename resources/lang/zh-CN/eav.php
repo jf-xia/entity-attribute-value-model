@@ -18,6 +18,7 @@ return [
     'back_to_list'      => '返回列表',
     'action'            => '操作',
     'order'            => '排序',
+    'reset'        => '重置',
 
 
     'entity'                        =>'业务实体',
@@ -40,6 +41,7 @@ return [
     'attribute_group_id'      =>'属性组ID',
     'attribute_group_name'      =>'组名称',
 
+    'attribute'=>'属性',
     'attributes'=>'属性',
     'attribute_code'=>'属性代码',
     'backend_class'=>'后端类',

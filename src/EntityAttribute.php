@@ -15,6 +15,26 @@ class EntityAttribute extends Model
         'entity_id', 'attribute_set_id', 'attribute_group_id',
         'attribute_id'
     ];
+
+    public function entity()
+    {
+        return $this->belongsTo(Entity::class, 'entity_id', 'entity_id');
+    }
+
+    public function attribute_set()
+    {
+        return $this->belongsTo(AttributeSet::class, 'attribute_set_id', 'attribute_set_id');
+    }
+
+    public function attribute_group()
+    {
+        return $this->belongsTo(AttributeGroup::class, 'attribute_group_id', 'attribute_group_id');
+    }
+
+    public function attribute()
+    {
+        return $this->belongsTo(Attribute::class, 'attribute_id', 'attribute_id');
+    }
     
     public static function map($data)
     {

@@ -21,6 +21,7 @@ Route::group([
     $router->get('/attr/set/{id}', 'AttributeSetController@attrSetDelete');
     $router->any('/attr/group', 'AttributeSetController@attrGroupStore');
     $router->get('/attr/group/{id}', 'AttributeSetController@attrGroupDelete');
+    $router->post('/attr/setmap', 'AttributeSetController@attrMap');
 
 });
 

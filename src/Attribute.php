@@ -432,6 +432,11 @@ class Attribute extends Model
             ->updateOrInsert($attributes, ['value' => $value]);
     }
 
+    public function entity()
+    {
+        return $this->belongsTo(Entity::class, 'entity_id', 'entity_id');
+    }
+
     public static function backendType()
     {
         return ['','static'=>trans('eav::eav.static'),'int'=>trans('eav::eav.int'),

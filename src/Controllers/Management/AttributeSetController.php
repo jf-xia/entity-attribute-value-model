@@ -7,6 +7,7 @@ use Eav\Attribute;
 use Eav\AttributeGroup;
 use Eav\AttributeSet;
 use Eav\Entity;
+use Eav\EntityAttribute;
 use Encore\Admin\Controllers\ModelForm;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -34,17 +35,124 @@ class AttributeSetController extends Controller
                     '<a href="'.admin_base_path('attributeset').
                     '" class="btn btn-sm btn-success"><i class="fa fa-save"></i>&nbsp;&nbsp;新增</a>'.
                     $this->attrSetGrid().$this->attrSetForm()))->style('success'));
-            });
-
-            $row->column(4, function (Column $column) {
                 $column->append((new Box(trans('eav::eav.attribute_group'),
                     '<a href="'.admin_base_path('attributeset').'?set='.Input::get('set').
                     '" class="btn btn-sm btn-success"><i class="fa fa-save"></i>&nbsp;&nbsp;新增</a>'.
                     $this->attrGroupGrid().$this->attrGroupForm()))->style('success'));
             });
-            $row->column(4, '');
+
+            $row->column(8, function (Column $column) {
+                $attributeSet = AttributeSet::query()->find(Input::get('set'));
+                $editAble = $attributeSet ? '<a href="'.admin_base_path('entity').'/'.$attributeSet->entity_id.
+                    '/edit" class="btn btn-sm btn-warning"><i class="fa fa-edit"></i>&nbsp;&nbsp;'.
+                    trans('eav::eav.edit').trans('eav::eav.attributes').trans('eav::eav.list').'</a>' : '';
+                $column->append((new Box(trans('eav::eav.attributes'),$editAble.$this->attrGrid())));
+            });
         });
         return $content;
+    }
+
+    public function attrMap()
+    {
+        $inputs = Input::all();
+        $setId = $inputs['set'];
+        unset($inputs['_token'],$inputs['set']);
+        if ($inputs){
+            $save = null;
+            foreach ($inputs as $input) {
+                if ($input['entity_id'] && $input['attribute_set_id'] && $input['attribute_group_id'] && $input['attribute_id']){
+                    $original = ['attribute_id' => $input['attribute_id']];
+                    if (isset($input['original']['attribute_group_id'])) {
+                        $original['attribute_group_id']=$input['original']['attribute_group_id'];
+                        $save = EntityAttribute::query()->updateOrCreate($original,[
+                            'entity_id' => $input['entity_id'],
+                            'attribute_set_id' => $input['attribute_set_id'],
+                            'attribute_group_id' => $input['attribute_group_id'],
+                            'attribute_id' => $input['attribute_id']
+                        ])->save();
+                    } else {
+                        $save = EntityAttribute::query()->create([
+                            'entity_id' => $input['entity_id'],
+                            'attribute_set_id' => $input['attribute_set_id'],
+                            'attribute_group_id' => $input['attribute_group_id'],
+                            'attribute_id' => $input['attribute_id']
+                        ])->save();
+                    }
+                }
+            }
+            if ($save){
+                admin_toastr(trans('admin.save_succeeded'));
+                return redirect(url(admin_base_path('attributeset').'?set='.$setId));
+            }
+        }
+        admin_toastr(trans('admin.save').trans('admin.failed'),'error');
+        return redirect(url(admin_base_path('attributeset')));
+    }
+
+    public function selectAttr($name,$default,$options,$attrId)
+    {
+        $attribute = new \Encore\Admin\Form\Field\Select('');
+        $attribute->setElementName('attr'.$attrId.'['.$name.']');
+        $attribute->default($default);
+        $attribute->setWidth(12,0);
+        $attribute->options($options);
+        $original = $default ? '<input name="attr'.$attrId.'[original]['.$name.']" type="hidden" value="'.$default.'" />':'';
+        return $attribute.$original;
+    }
+
+    public function attrData($rows,$rows2)
+    {
+        $drows = [];
+        $optionEntity = Entity::all()->pluck('entity_name','entity_id');
+        $optionAttributeSet = AttributeSet::all()->pluck('attribute_set_name','attribute_set_id');
+        $optionAttributeGroup = AttributeGroup::all()->pluck('attribute_group_name','attribute_group_id');
+        foreach ($rows as $row) {
+            $drow=[];
+            $drow['entity_id']=$this->selectAttr('entity_id',$row['entity_id'],$optionEntity,$row['attribute']['attribute_id']);
+            $drow['attribute_set_id']=$this->selectAttr('attribute_set_id',$row['attribute_set_id'],$optionAttributeSet,$row['attribute']['attribute_id']);
+            $drow['attribute_group_id']=$this->selectAttr('attribute_group_id',$row['attribute_group_id'],$optionAttributeGroup,$row['attribute']['attribute_id']);
+            $drow['attribute_code'] = $row['attribute']['attribute_code'].
+                '<input name="attr'.$row['attribute_id'].'[attribute_id]" type="hidden" value="'.$row['attribute']['attribute_id'].'" />';
+            $drow['frontend_label'] = $row['attribute']['frontend_label'];
+            $drow['frontend_type'] = $row['attribute']['frontend_type'];
+//                $drow['frontend_class'] = $row['attribute']['frontend_class'];
+            $drows[] = $drow;
+        }
+        foreach ($rows2 as $row) {
+            $drow=[];
+            $drow['entity_id']=$this->selectAttr('entity_id','',$optionEntity,$row['attribute_id']);
+            $drow['attribute_set_id']=$this->selectAttr('attribute_set_id','',$optionAttributeSet,$row['attribute_id']);
+            $drow['attribute_group_id']=$this->selectAttr('attribute_group_id','',$optionAttributeGroup,$row['attribute_id']);
+            $drow['attribute_code'] = $row['attribute_code'].
+                '<input name="attr'.$row['attribute_id'].'[attribute_id]" type="hidden" value="'.$row['attribute_id'].'" />';
+            $drow['frontend_label'] = $row['frontend_label'];
+            $drow['frontend_type'] = $row['frontend_type'];
+            $drows[] = $drow;
+        }
+        return $drows;
+    }
+
+    public function attrGrid()
+    {
+        $grid = new \Encore\Admin\Widgets\Table();
+        if(Input::get('set')){
+            $entityAttr = EntityAttribute::with('attribute')->where('attribute_set_id', Input::get('set'))->get();
+            $attrs = Attribute::query()->where('entity_id',AttributeSet::query()->find(Input::get('set'))->entity_id)
+                ->whereNotIn('attribute_id',$entityAttr->pluck('attribute_id'))->get();
+            if ($entityAttr || $attrs){
+                $drows = $this->attrData($entityAttr->toArray(),$attrs->toArray());
+                $grid->setHeaders(array_map(function($th){return trans('eav::eav.'.$th);},array_keys($drows[0])));
+                $grid->setRows($drows);
+            }
+        }
+        $setId = (new Form\Field\Hidden('set'))->value(Input::get('set')?Input::get('set'):'');
+        $form = '<form action="'.admin_base_path('attr/setmap').'" method="post" accept-charset="UTF-8">';
+        $form .= $grid->render();
+        $form .= '<div class="box-footer">'.$setId.csrf_field().'<div class="col-md-2"></div><div class="col-md-8">
+        <div class="btn-group pull-right"><button type="submit" class="btn btn-info pull-right" >'.trans('eav::eav.save').'</button></div>
+        <div class="btn-group pull-left"><button type="reset" class="btn btn-warning">'.trans('eav::eav.reset').'</button></div>
+        </div></div></form>';
+        return $form;
     }
 
     public function attrGroupGrid()
