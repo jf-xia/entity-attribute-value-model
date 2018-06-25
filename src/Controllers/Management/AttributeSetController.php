@@ -42,14 +42,20 @@ class AttributeSetController extends Controller
             });
 
             $row->column(8, function (Column $column) {
-                $attributeSet = AttributeSet::query()->find(Input::get('set'));
-                $editAble = $attributeSet ? '<a href="'.admin_base_path('entity').'/'.$attributeSet->entity_id.
+                $attrEntityId = $this->getEntityId();
+                $editAble = $attrEntityId ? '<a href="'.admin_base_path('entity').'/'.$attrEntityId.
                     '/edit" class="btn btn-sm btn-warning"><i class="fa fa-edit"></i>&nbsp;&nbsp;'.
                     trans('eav::eav.edit').trans('eav::eav.attributes').trans('eav::eav.list').'</a>' : '';
                 $column->append((new Box(trans('eav::eav.attributes'),$editAble.$this->attrGrid())));
             });
         });
         return $content;
+    }
+
+    public function getEntityId()
+    {
+        $attributeSet = AttributeSet::query()->find(Input::get('set'));
+        return $attributeSet ? $attributeSet->entity_id : null;
     }
 
     public function attrMap()
@@ -65,15 +71,13 @@ class AttributeSetController extends Controller
                     if (isset($input['original']['attribute_group_id'])) {
                         $original['attribute_group_id']=$input['original']['attribute_group_id'];
                         $save = EntityAttribute::query()->updateOrCreate($original,[
-                            'entity_id' => $input['entity_id'],
-                            'attribute_set_id' => $input['attribute_set_id'],
                             'attribute_group_id' => $input['attribute_group_id'],
                             'attribute_id' => $input['attribute_id']
                         ])->save();
                     } else {
                         $save = EntityAttribute::query()->create([
-                            'entity_id' => $input['entity_id'],
-                            'attribute_set_id' => $input['attribute_set_id'],
+                            'entity_id' => $this->getEntityId(),
+                            'attribute_set_id' => $setId,
                             'attribute_group_id' => $input['attribute_group_id'],
                             'attribute_id' => $input['attribute_id']
                         ])->save();
@@ -137,7 +141,7 @@ class AttributeSetController extends Controller
         $grid = new \Encore\Admin\Widgets\Table();
         if(Input::get('set')){
             $entityAttr = EntityAttribute::with('attribute')->where('attribute_set_id', Input::get('set'))->get();
-            $attrs = Attribute::query()->where('entity_id',AttributeSet::query()->find(Input::get('set'))->entity_id)
+            $attrs = Attribute::query()->where('entity_id',$this->getEntityId())
                 ->whereNotIn('attribute_id',$entityAttr->pluck('attribute_id'))->get();
             if ($entityAttr || $attrs){
                 $drows = $this->attrData($entityAttr->toArray(),$attrs->toArray());
