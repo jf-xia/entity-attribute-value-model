@@ -95,6 +95,11 @@ class AttributeController extends Controller
             $form->select('is_searchable',trans('eav::eav.is_searchable'))->options(status());
             $form->select('is_required',trans('eav::eav.is_required'))->options(status());
             $form->text('required_validate_class',trans('eav::eav.required_validate_class'));
+            $form->subForm('option',trans('eav::eav.option'), function (Form\NestedForm $form) {
+//                $form->display('option_id', '');
+                $form->text('label',trans('eav::eav.label'))->setElementClass('option_label');
+                $form->text('value',trans('eav::eav.value'));
+            });
         });
     }
 }

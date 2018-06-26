@@ -37,21 +37,70 @@ class LadminController extends Controller
         $content = Admin::content();
         $content->header($this->entity->entity_name.trans('eav::eav.list'));
         $content->description($this->entity->entity_desc);
-
-        $grid = Admin::grid($this->entity->entity_class, function (Grid $grid) {
-            $grid->id('ID')->sortable();
-            foreach ($this->attrs() as $attr) {
-                $grid->column($attr->attribute_code,$attr->frontend_label);
-            }
-        });
-        $content->body($grid);
+        $content->body($this->grid());
         return $content;
     }
 
-    private function attrs()
+    public function grid()
     {
-        return Attribute::where('entity_id',$this->entity->entity_id)->get();
+        return Admin::grid($this->entity->entity_class, function (Grid $grid) {
+            $grid->id('ID')->sortable();
+            foreach ($this->attrs() as $attr) {
+                if (!$attr->not_list && $attr->backend_type<>'text'){
+                    $grid->column($attr->attribute_code,$attr->frontend_label);
+                }
+            }
+            $this->getActions($grid);
+            $this->getTools($grid);
+            $this->getFilter($grid);
+//            $grid->disableExport();
+        });
     }
+
+    public function getActions($grid)
+    {
+//        $grid->disableCreateButton();
+        if(!Admin::user()->isAdministrator()){
+            $grid->actions(function ($actions) {
+                $actions->disableDelete();
+            });
+        }
+    }
+
+    public function getTools($grid)
+    {
+        if(!Admin::user()->isAdministrator()){
+            $grid->tools(function ($tools) {
+                $tools->batch(function ($batch) {
+                    $batch->disableDelete();
+                });
+            });
+        }
+    }
+
+    public function getFilter($grid)
+    {
+        $grid->filter(function ($filter)  {
+            $filter->disableIdFilter();
+            foreach ($this->attrs() as $attr) {
+                if (!$attr->not_list && $attr->backend_type <> 'text') {
+                    $ft = $attr->frontend_type;
+                    if ($ft == 'select' || $ft == 'radio'){
+                        $filter->equal($attr->attribute_code,$attr->frontend_label)->select($attr->options());
+                    } elseif($ft == 'multipleSelect'|| $ft == 'checkbox'){
+                        $filter->in($attr->attribute_code,$attr->frontend_label)->multipleSelect($attr->options());
+                    } elseif ($ft == 'datetime' || $ft == 'date'){
+                        $filter->between($attr->attribute_code,$attr->frontend_label)->datetime();
+                    } elseif ($ft == 'currency' || $ft == 'decimal' || $ft == 'number' || $ft == 'rate'){
+                        $filter->between($attr->attribute_code,$attr->frontend_label);
+                    } else {
+                        $filter->like($attr->attribute_code.'_attr.value',$attr->frontend_label);
+                    }
+                }
+            }
+        });
+    }
+
 
     public function edit($id)
     {
@@ -81,9 +130,26 @@ class LadminController extends Controller
         return Admin::form($this->entity->entity_class, function (Form $form) {
             $form->id('id','ID');
             foreach ($this->attrs() as $attr) {
-                $form->{$attr->frontend_type}($attr->attribute_code,$attr->frontend_label);
+                $attField = $form->{$attr->frontend_type}($attr->attribute_code,$attr->frontend_label);
+                if ($attr->frontend_type == 'select' || $attr->frontend_type == 'multipleSelect' ||
+                    $attr->frontend_type == 'checkbox' || $attr->frontend_type == 'radio')
+                    $attField = $attField->options($attr->options());
+                if($attr->is_required) {
+                    $attField = $attField->attribute('required','required');
+                }
+                if($attr->default_value) {
+                    $attField = $attField->default($attr->default_value);
+                }
+                if($attr->required_validate_class) {
+                    $attField = $attField->addElementClass($attr->required_validate_class);
+                }
             }
         });
+    }
+
+    private function attrs()
+    {
+        return Attribute::where('entity_id',$this->entity->entity_id)->orderBy('order')->get();
     }
 
 //    public function test()

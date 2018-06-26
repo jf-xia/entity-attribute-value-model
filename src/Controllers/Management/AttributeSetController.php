@@ -64,29 +64,28 @@ class AttributeSetController extends Controller
         $setId = $inputs['set'];
         unset($inputs['_token'],$inputs['set']);
         if ($inputs){
-            $save = null;
-            foreach ($inputs as $input) {
-                if ($input['entity_id'] && $input['attribute_set_id'] && $input['attribute_group_id'] && $input['attribute_id']){
-                    $original = ['attribute_id' => $input['attribute_id']];
+            try{
+                foreach ($inputs as $input) {
                     if (isset($input['original']['attribute_group_id'])) {
-                        $original['attribute_group_id']=$input['original']['attribute_group_id'];
-                        $save = EntityAttribute::query()->updateOrCreate($original,[
-                            'attribute_group_id' => $input['attribute_group_id'],
-                            'attribute_id' => $input['attribute_id']
-                        ])->save();
+                        EntityAttribute::query()->where('attribute_group_id',$input['original']['attribute_group_id'])
+                            ->where('attribute_id',$input['attribute_id'])->update([
+                                'attribute_group_id' => $input['attribute_group_id']
+                            ]);
                     } else {
-                        $save = EntityAttribute::query()->create([
-                            'entity_id' => $this->getEntityId(),
-                            'attribute_set_id' => $setId,
-                            'attribute_group_id' => $input['attribute_group_id'],
-                            'attribute_id' => $input['attribute_id']
-                        ])->save();
+                        if (isset($input['attribute_group_id']) && $this->getEntityId()){
+                            EntityAttribute::query()->create([
+                                'entity_id' => $this->getEntityId(),
+                                'attribute_set_id' => $setId,
+                                'attribute_group_id' => $input['attribute_group_id'],
+                                'attribute_id' => $input['attribute_id']
+                            ]);
+                        }
                     }
                 }
-            }
-            if ($save){
                 admin_toastr(trans('admin.save_succeeded'));
                 return redirect(url(admin_base_path('attributeset').'?set='.$setId));
+            }catch (\Exception $e){
+                \Log::debug($e);
             }
         }
         admin_toastr(trans('admin.save').trans('admin.failed'),'error');
@@ -107,13 +106,9 @@ class AttributeSetController extends Controller
     public function attrData($rows,$rows2)
     {
         $drows = [];
-        $optionEntity = Entity::all()->pluck('entity_name','entity_id');
-        $optionAttributeSet = AttributeSet::all()->pluck('attribute_set_name','attribute_set_id');
         $optionAttributeGroup = AttributeGroup::all()->pluck('attribute_group_name','attribute_group_id');
         foreach ($rows as $row) {
             $drow=[];
-            $drow['entity_id']=$this->selectAttr('entity_id',$row['entity_id'],$optionEntity,$row['attribute']['attribute_id']);
-            $drow['attribute_set_id']=$this->selectAttr('attribute_set_id',$row['attribute_set_id'],$optionAttributeSet,$row['attribute']['attribute_id']);
             $drow['attribute_group_id']=$this->selectAttr('attribute_group_id',$row['attribute_group_id'],$optionAttributeGroup,$row['attribute']['attribute_id']);
             $drow['attribute_code'] = $row['attribute']['attribute_code'].
                 '<input name="attr'.$row['attribute_id'].'[attribute_id]" type="hidden" value="'.$row['attribute']['attribute_id'].'" />';
@@ -124,8 +119,6 @@ class AttributeSetController extends Controller
         }
         foreach ($rows2 as $row) {
             $drow=[];
-            $drow['entity_id']=$this->selectAttr('entity_id','',$optionEntity,$row['attribute_id']);
-            $drow['attribute_set_id']=$this->selectAttr('attribute_set_id','',$optionAttributeSet,$row['attribute_id']);
             $drow['attribute_group_id']=$this->selectAttr('attribute_group_id','',$optionAttributeGroup,$row['attribute_id']);
             $drow['attribute_code'] = $row['attribute_code'].
                 '<input name="attr'.$row['attribute_id'].'[attribute_id]" type="hidden" value="'.$row['attribute_id'].'" />';

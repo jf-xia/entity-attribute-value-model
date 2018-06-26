@@ -230,6 +230,11 @@ class Attribute extends Model
         return $this->hasMany(AttributeOption::class, 'attribute_id');
     }
 
+    public function option()
+    {
+        return $this->hasMany(AttributeOption::class, 'attribute_id', 'attribute_id');
+    }
+
     /**
      * Retrieve entity instance
      *

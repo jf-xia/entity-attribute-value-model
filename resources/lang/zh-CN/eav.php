@@ -59,4 +59,9 @@ return [
     'static'=>'字段','int'=>'整数','varchar'=>'字符串',
     'text'=>'大文本','decimal'=>'浮点数','datetime'=>'时间',
 
+    'option'=>'字段选项',
+    'label'=>'字段标签',
+    'value'=>'字段值',
+
+
 ];
