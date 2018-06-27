@@ -24,7 +24,7 @@ class AttributeController extends Controller
 
         $grid = Admin::grid(Attribute::class, function (Grid $grid) {
             $grid->column('attribute_id','ID')->sortable();
-            $grid->column('entity_id',trans('eav::eav.entity'));
+            $grid->column('entity.entity_name',trans('eav::eav.entity'));
             $grid->column('attribute_code',trans('eav::eav.attribute_code'));
             $grid->column('backend_class',trans('eav::eav.backend_class'));
             $grid->column('backend_type',trans('eav::eav.backend_type'));
@@ -82,6 +82,7 @@ class AttributeController extends Controller
     {
         return Admin::form(Attribute::class, function (Form $form) {
             $form->display('attribute_id', 'ID');
+            $form->select('entity_id',trans('eav::eav.entity'))->options(Entity::all()->pluck('entity_name','entity_id'));
             $form->text('attribute_code',trans('eav::eav.attribute_code'));
             $form->text('backend_class',trans('eav::eav.backend_class'));
             $form->select('backend_type',trans('eav::eav.backend_type'))->options(Attribute::backendType());

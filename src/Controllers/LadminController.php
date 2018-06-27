@@ -3,8 +3,11 @@
 namespace Eav\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Products;
 use Eav\Attribute;
 use Eav\Entity;
+use Eav\EntityAttribute;
+use Eav\Grid\Filter;
 use Encore\Admin\Controllers\Dashboard;
 use Encore\Admin\Controllers\ModelForm;
 use Encore\Admin\Facades\Admin;
@@ -83,18 +86,18 @@ class LadminController extends Controller
         $grid->filter(function ($filter)  {
             $filter->disableIdFilter();
             foreach ($this->attrs() as $attr) {
-                if (!$attr->not_list && $attr->backend_type <> 'text') {
+                if (!$attr->not_list && $attr->backend_type <> 'text' && $attr->is_filterable) {
                     $ft = $attr->frontend_type;
                     if ($ft == 'select' || $ft == 'radio'){
-                        $filter->equal($attr->attribute_code,$attr->frontend_label)->select($attr->options());
+                        $filter->use((new Filter\Equal($attr->attribute_code.'_attr.value',$attr->frontend_label)))->{$ft}($attr->options());
                     } elseif($ft == 'multipleSelect'|| $ft == 'checkbox'){
-                        $filter->in($attr->attribute_code,$attr->frontend_label)->multipleSelect($attr->options());
-                    } elseif ($ft == 'datetime' || $ft == 'date'){
-                        $filter->between($attr->attribute_code,$attr->frontend_label)->datetime();
+                        $filter->use((new Filter\In($attr->attribute_code.'_attr.value',$attr->frontend_label))->{$ft}($attr->options()));
+                    } elseif ($ft == 'datetime' || $ft == 'date' || $ft == 'time' || $ft == 'day' || $ft == 'month' || $ft == 'year'){
+                        $filter->use((new Filter\Between($attr->attribute_code.'_attr.value',$attr->frontend_label))->{$ft}());
                     } elseif ($ft == 'currency' || $ft == 'decimal' || $ft == 'number' || $ft == 'rate'){
-                        $filter->between($attr->attribute_code,$attr->frontend_label);
+                        $filter->use(new Filter\Between($attr->attribute_code.'_attr.value',$attr->frontend_label));
                     } else {
-                        $filter->like($attr->attribute_code.'_attr.value',$attr->frontend_label);
+                        $filter->use(new Filter\Like($attr->attribute_code.'_attr.value',$attr->frontend_label));
                     }
                 }
             }
@@ -128,28 +131,35 @@ class LadminController extends Controller
     protected function form()
     {
         return Admin::form($this->entity->entity_class, function (Form $form) {
+//            dd($this->attrsOnGroup()->groupBy('attribute_group_id')->toArray());
             $form->id('id','ID');
-            foreach ($this->attrs() as $attr) {
-                $attField = $form->{$attr->frontend_type}($attr->attribute_code,$attr->frontend_label);
-                if ($attr->frontend_type == 'select' || $attr->frontend_type == 'multipleSelect' ||
-                    $attr->frontend_type == 'checkbox' || $attr->frontend_type == 'radio')
-                    $attField = $attField->options($attr->options());
-                if($attr->is_required) {
-                    $attField = $attField->attribute('required','required');
-                }
-                if($attr->default_value) {
-                    $attField = $attField->default($attr->default_value);
-                }
-                if($attr->required_validate_class) {
-                    $attField = $attField->addElementClass($attr->required_validate_class);
-                }
+            foreach ($this->attrsOnGroup()->groupBy('attribute_group_id') as $attrGroup) {
+                $form->tab($attrGroup->first()->attribute_group->attribute_group_name, function ($form) use ($attrGroup) {
+                    foreach ($attrGroup as $entityAttr) {
+                        $attr = $entityAttr->attribute;
+                        $attField = $form->{$attr->frontend_type}($attr->attribute_code,$attr->frontend_label);
+                        if ($attr->frontend_type == 'select' || $attr->frontend_type == 'multipleSelect' ||
+                            $attr->frontend_type == 'checkbox' || $attr->frontend_type == 'radio')
+                            $attField = $attField->options($attr->options());
+                        if ($attr->is_required) $attField = $attField->attribute('required','required');
+                        if ($attr->default_value) $attField = $attField->default($attr->default_value);
+                        if ($attr->required_validate_class) $attField = $attField->addElementClass($attr->required_validate_class);
+                    }
+                });
             }
         });
     }
 
     private function attrs()
     {
-        return Attribute::where('entity_id',$this->entity->entity_id)->orderBy('order')->get();
+        return Attribute::where('entity_id',$this->entity->entity_id)->get();
+    }
+
+    private function attrsOnGroup()
+    {
+        $attribute_set_id = false ? : $this->entity->default_attribute_set_id;
+        return EntityAttribute::where('entity_id',$this->entity->entity_id)
+            ->where('attribute_set_id',$attribute_set_id)->with(['attribute','attribute_group'])->get();
     }
 
 //    public function test()

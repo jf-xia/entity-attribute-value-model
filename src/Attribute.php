@@ -2,6 +2,7 @@
 
 namespace Eav;
 
+use Illuminate\Database\Eloquent\Builder;
 use ReflectionException;
 use Eav\Attribute\Concerns;
 use Eav\Attribute\Collection;
@@ -497,5 +498,14 @@ class Attribute extends Model
             'multipleImage'=>'multipleImage',
             'captcha'=>'captcha',
             'listbox'=>'listbox'];
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope('order', function(Builder $builder) {
+            $builder->orderBy('order');
+        });
     }
 }

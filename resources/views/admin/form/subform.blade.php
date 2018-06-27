@@ -2,9 +2,7 @@
 
 <div id="has-many-{{$column}}" class="has-many-{{$column}}">
     <div class="col-md-12 table-responsive no-padding">
-        <div class="{{$viewClass['label']}}">
-            <h3 class="pull-right">{{ $label }} &nbsp; </h3>
-        </div>
+        <h3 class="pull-left">{{ $label }} &nbsp; </h3>
 
         <table class="table has-many-{{$column}}-forms subForm">
             <thead><tr>

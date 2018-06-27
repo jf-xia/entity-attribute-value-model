@@ -25,7 +25,7 @@ class AttributeSet extends Model
         return $this->belongsTo(Entity::class, 'entity_id', 'entity_id');
     }
     
-    public function attributeGroup()
+    public function attribute_group()
     {
         return $this->hasMany(AttributeGroup::class, 'attribute_set_id');
     }

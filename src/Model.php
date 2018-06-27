@@ -68,7 +68,6 @@ abstract class Model extends Eloquent
     protected function addModelEvent()
     {
         $model = $this;
-
         static::saving(function () use ($model) {
             if (!$model->exists) {
                 if (!$model->attribute_set_id) {
