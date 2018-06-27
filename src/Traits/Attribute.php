@@ -52,7 +52,7 @@ trait Attribute
                 }
             })->get()->patch();
 
-
+dd($loadedAttributes);
         return $loadedAttributes;
     }
     

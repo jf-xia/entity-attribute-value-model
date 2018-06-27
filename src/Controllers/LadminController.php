@@ -19,6 +19,8 @@ use Encore\Admin\Layout\Row;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class LadminController extends Controller
 {
@@ -50,7 +52,12 @@ class LadminController extends Controller
             $grid->id('ID')->sortable();
             foreach ($this->attrs() as $attr) {
                 if (!$attr->not_list && $attr->backend_type<>'text'){
-                    $grid->column($attr->attribute_code,$attr->frontend_label);
+                    $eavGrid = $grid->column($attr->attribute_code,$attr->frontend_label);
+//                    if ($attr->list_field_html) {
+//                        $eavGrid = $eavGrid->display(function($val){
+//
+//                        });
+//                    }
                 }
             }
             $this->getActions($grid);
@@ -130,6 +137,8 @@ class LadminController extends Controller
      */
     protected function form()
     {
+//        $rule = [''=>Rule::unique('product_varchar')->where(function ($query) {$query->where('attribute_id',3);})];
+//        Validator::make(Input::all(), $rule);
         return Admin::form($this->entity->entity_class, function (Form $form) {
 //            dd($this->attrsOnGroup()->groupBy('attribute_group_id')->toArray());
             $form->id('id','ID');
@@ -142,6 +151,10 @@ class LadminController extends Controller
                             $attr->frontend_type == 'checkbox' || $attr->frontend_type == 'radio')
                             $attField = $attField->options($attr->options());
                         if ($attr->is_required) $attField = $attField->attribute('required','required');
+                        if ($attr->is_unique) $attField = $attField->rules(['required',
+                            Rule::unique($attr->getBackendTable(),'value')->where(function ($query) use ($attr)
+                                {$query->where('attribute_id',$attr->attribute_id);}
+                            )]);
                         if ($attr->default_value) $attField = $attField->default($attr->default_value);
                         if ($attr->required_validate_class) $attField = $attField->addElementClass($attr->required_validate_class);
                     }
