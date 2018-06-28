@@ -53,11 +53,11 @@ class LadminController extends Controller
             foreach ($this->attrs() as $attr) {
                 if (!$attr->not_list && $attr->backend_type<>'text'){
                     $eavGrid = $grid->column($attr->attribute_code,$attr->frontend_label);
-//                    if ($attr->list_field_html) {
-//                        $eavGrid = $eavGrid->display(function($val){
-//
-//                        });
-//                    }
+                    if ($attr->list_field_html) {
+                        $eavGrid = $eavGrid->display(function($val){
+//todo list_field_html
+                        });
+                    }
                 }
             }
             $this->getActions($grid);
@@ -157,6 +157,8 @@ class LadminController extends Controller
                             )]);
                         if ($attr->default_value) $attField = $attField->default($attr->default_value);
                         if ($attr->required_validate_class) $attField = $attField->addElementClass($attr->required_validate_class);
+                        if ($attr->placeholder) $attField = $attField->placeholder($attr->placeholder);
+                        if ($attr->help) $attField = $attField->help($attr->help);
                     }
                 });
             }
