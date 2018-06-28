@@ -443,6 +443,23 @@ class Attribute extends Model
         return $this->belongsTo(Entity::class, 'entity_id', 'entity_id');
     }
 
+    public function getListHtml($value)
+    {//todo 待优化
+        $customHtml = $this->attributes['list_field_html'];
+        $data = json_decode($value);
+        if (is_array($data)){
+            $html = '';
+            foreach ($data as $item) {
+                $html .= $customHtml ? str_replace("%value%", $item, $customHtml) : $item;
+            }
+            return $html;
+        } elseif (!$value){
+            return '';
+        } else {
+            return $customHtml ? str_replace("%value%", $value, $customHtml) : $value;
+        }
+    }
+
     public static function backendType()
     {
         return ['','static'=>trans('eav::eav.static'),'int'=>trans('eav::eav.int'),

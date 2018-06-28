@@ -54,8 +54,9 @@ class LadminController extends Controller
                 if (!$attr->not_list && $attr->backend_type<>'text'){
                     $eavGrid = $grid->column($attr->attribute_code,$attr->frontend_label);
                     if ($attr->list_field_html) {
-                        $eavGrid = $eavGrid->display(function($val){
-//todo list_field_html
+                        //<a target="_blank" href="https://item.jd.com/%value%.html" alt="SKU" >%value%</a>
+                        $eavGrid = $eavGrid->display(function($val) use ($attr){
+                            return $attr->getListHtml($val);
                         });
                     }
                 }
@@ -137,10 +138,7 @@ class LadminController extends Controller
      */
     protected function form()
     {
-//        $rule = [''=>Rule::unique('product_varchar')->where(function ($query) {$query->where('attribute_id',3);})];
-//        Validator::make(Input::all(), $rule);
         return Admin::form($this->entity->entity_class, function (Form $form) {
-//            dd($this->attrsOnGroup()->groupBy('attribute_group_id')->toArray());
             $form->id('id','ID');
             foreach ($this->attrsOnGroup()->groupBy('attribute_group_id') as $attrGroup) {
                 $form->tab($attrGroup->first()->attribute_group->attribute_group_name, function ($form) use ($attrGroup) {
@@ -159,6 +157,7 @@ class LadminController extends Controller
                         if ($attr->required_validate_class) $attField = $attField->addElementClass($attr->required_validate_class);
                         if ($attr->placeholder) $attField = $attField->placeholder($attr->placeholder);
                         if ($attr->help) $attField = $attField->help($attr->help);
+                        //todo form_field_html
                     }
                 });
             }
@@ -171,7 +170,7 @@ class LadminController extends Controller
     }
 
     private function attrsOnGroup()
-    {
+    {//todo get attribute_set_id
         $attribute_set_id = false ? : $this->entity->default_attribute_set_id;
         return EntityAttribute::where('entity_id',$this->entity->entity_id)
             ->where('attribute_set_id',$attribute_set_id)->with(['attribute','attribute_group'])->get();

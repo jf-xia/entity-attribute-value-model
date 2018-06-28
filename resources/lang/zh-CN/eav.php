@@ -56,6 +56,9 @@ return [
     'is_searchable'=>'搜索字段',
     'is_required'=>'必填字段',
     'required_validate_class'=>'验证类',
+    'list_field_html'=>'列表自定义显示',
+    'help'=>'帮助信息',
+    'placeholder'=>'提示信息',
     'static'=>'字段','int'=>'整数','varchar'=>'字符串',
     'text'=>'大文本','decimal'=>'浮点数','datetime'=>'时间',
 

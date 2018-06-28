@@ -81,26 +81,35 @@ class AttributeController extends Controller
     protected function form()
     {
         return Admin::form(Attribute::class, function (Form $form) {
-            $form->display('attribute_id', 'ID');
-            $form->select('entity_id',trans('eav::eav.entity'))->options(Entity::all()->pluck('entity_name','entity_id'));
-            $form->text('attribute_code',trans('eav::eav.attribute_code'));
-            $form->text('backend_class',trans('eav::eav.backend_class'));
-            $form->select('backend_type',trans('eav::eav.backend_type'))->options(Attribute::backendType());
-            $form->text('backend_table',trans('eav::eav.backend_table'));
-            $form->text('frontend_class',trans('eav::eav.frontend_class'));
-            $form->select('frontend_type',trans('eav::eav.frontend_type'))->options(Attribute::frontendType());
-            $form->text('frontend_label',trans('eav::eav.frontend_label'));
-            $form->text('source_class',trans('eav::eav.source_class'));
-            $form->text('default_value',trans('eav::eav.default_value'));
-            $form->select('is_filterable',trans('eav::eav.is_filterable'))->options(status());
-            $form->select('is_searchable',trans('eav::eav.is_searchable'))->options(status());
-            $form->select('is_required',trans('eav::eav.is_required'))->options(status());
-            $form->text('required_validate_class',trans('eav::eav.required_validate_class'));
+            $form->display('attribute_id', 'ID')->setElementName();
+            $form->select('entity_id',trans('eav::eav.entity'))->options(Entity::all()->pluck('entity_name','entity_id'))->rules('required');
+            $this->formFileds($form);
             $form->subForm('option',trans('eav::eav.option'), function (Form\NestedForm $form) {
 //                $form->display('option_id', '');
                 $form->text('label',trans('eav::eav.label'))->setElementClass('option_label');
                 $form->text('value',trans('eav::eav.value'));
             });
         });
+    }
+
+    public function formFileds($form)
+    {
+        $form->text('attribute_code',trans('eav::eav.attribute_code'))->rules('unique:attributes');
+        $form->text('backend_class',trans('eav::eav.backend_class'));
+        $form->select('backend_type',trans('eav::eav.backend_type'))->options(Attribute::backendType())->rules('required');
+        $form->text('backend_table',trans('eav::eav.backend_table'));
+        $form->text('frontend_class',trans('eav::eav.frontend_class'));
+        $form->select('frontend_type',trans('eav::eav.frontend_type'))->options(Attribute::frontendType())->rules('required');
+        $form->text('frontend_label',trans('eav::eav.frontend_label'));
+        $form->text('source_class',trans('eav::eav.source_class'));
+        $form->text('default_value',trans('eav::eav.default_value'));
+        $form->select('is_filterable',trans('eav::eav.is_filterable'))->options(status())->rules('required');
+        $form->select('is_searchable',trans('eav::eav.is_searchable'))->options(status())->rules('required');
+        $form->select('is_required',trans('eav::eav.is_required'))->options(status())->rules('required');
+        $form->text('required_validate_class',trans('eav::eav.required_validate_class'));
+        $form->text('order',trans('eav::eav.order'));
+        $form->text('list_field_html',trans('eav::eav.list_field_html'));
+        $form->text('help',trans('eav::eav.help'));
+        $form->text('placeholder',trans('eav::eav.placeholder'));
     }
 }
