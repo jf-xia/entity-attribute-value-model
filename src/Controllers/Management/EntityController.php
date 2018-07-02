@@ -16,6 +16,10 @@ use Encore\Admin\Layout\Row;
 class EntityController extends Controller
 {
 
+    /** todo Report & chartjs setting & default by option group Pie, count Bar & Scatter, value Line, skills Radar & Polar area
+     *
+     * @return Content
+     */
     public function index()
     {
         $content = Admin::content();
@@ -63,7 +67,7 @@ class EntityController extends Controller
     }
 
     /**
-     * Create interface.
+     * Create interface. todo create with ModelMakeCommand & attrs & m2m & permission & menu
      *
      * @return Content
      */

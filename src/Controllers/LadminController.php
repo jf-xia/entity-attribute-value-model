@@ -59,6 +59,7 @@ class LadminController extends Controller
                             return $attr->getListHtml($val);
                         });
                     }
+                    $eavGrid = $eavGrid->sortable();
                 }
             }
             $this->getActions($grid);

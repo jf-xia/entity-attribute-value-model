@@ -260,6 +260,24 @@ class Builder extends QueryBuilder
 
         return $this;
     }
+
+    /**
+     * Add a basic where clause to the query. todo where**
+     *
+     * @param  string|array|\Closure  $column
+     * @param  mixed   $operator
+     * @param  mixed   $value
+     * @param  string  $boolean
+     * @return $this
+     */
+//    public function where($column, $operator = null, $value = null, $boolean = 'and')
+//    {
+//        if (!$this->canUseFlat()) {
+//            $column = $column.'_attr.value';
+//        }
+//        parent::where($column, $operator = null, $value = null, $boolean = 'and');
+//        return $this;
+//    }
     
     
     /**
@@ -702,7 +720,7 @@ class Builder extends QueryBuilder
         if ($this->canUseFlat()) {
             return $this->orderBy($column, $direction);
         }
-        
+
         $property = $this->unions ? 'unionOrders' : 'orders';
         $direction = strtolower($direction) == 'asc' ? 'asc' : 'desc';
 

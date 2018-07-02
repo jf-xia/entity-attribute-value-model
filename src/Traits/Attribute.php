@@ -61,7 +61,7 @@ trait Attribute
         $mainTableAttributeCollection = $loadedAttributes->filter(function ($attribute) {
             return $attribute->isStatic();
         });
-        
+
         $mainTableAttribute = $mainTableAttributeCollection->code()->toArray();
         
         $mainTableAttribute[] = 'entity_id';
