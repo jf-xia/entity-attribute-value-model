@@ -7,7 +7,6 @@ use App\Products;
 use Eav\Attribute;
 use Eav\Entity;
 use Eav\EntityAttribute;
-use Eav\Grid\Filter;
 use Encore\Admin\Controllers\Dashboard;
 use Encore\Admin\Controllers\ModelForm;
 use Encore\Admin\Facades\Admin;
@@ -25,7 +24,9 @@ use Illuminate\Validation\Rule;
 class LadminController extends Controller
 {
     use ModelForm;
+
     private $entityCode;
+
     private $entity;
 
     public function __construct()
@@ -98,21 +99,20 @@ class LadminController extends Controller
                 if (!$attr->not_list && $attr->backend_type <> 'text' && $attr->is_filterable) {
                     $ft = $attr->frontend_type;
                     if ($ft == 'select' || $ft == 'radio'){
-                        $filter->use((new Filter\Equal($attr->attribute_code.'_attr.value',$attr->frontend_label)))->{$ft}($attr->options());
+                        $filter->equal($attr->attribute_code,$attr->frontend_label)->{$ft}($attr->options());
                     } elseif($ft == 'multipleSelect'|| $ft == 'checkbox'){
-                        $filter->use((new Filter\In($attr->attribute_code.'_attr.value',$attr->frontend_label))->{$ft}($attr->options()));
+                        $filter->in($attr->attribute_code,$attr->frontend_label)->{$ft}($attr->options());
                     } elseif ($ft == 'datetime' || $ft == 'date' || $ft == 'time' || $ft == 'day' || $ft == 'month' || $ft == 'year'){
-                        $filter->use((new Filter\Between($attr->attribute_code.'_attr.value',$attr->frontend_label))->{$ft}());
+                        $filter->between($attr->attribute_code,$attr->frontend_label)->{$ft}();
                     } elseif ($ft == 'currency' || $ft == 'decimal' || $ft == 'number' || $ft == 'rate'){
-                        $filter->use(new Filter\Between($attr->attribute_code.'_attr.value',$attr->frontend_label));
+                        $filter->between($attr->attribute_code,$attr->frontend_label);
                     } else {
-                        $filter->use(new Filter\Like($attr->attribute_code.'_attr.value',$attr->frontend_label));
+                        $filter->like($attr->attribute_code,$attr->frontend_label);
                     }
                 }
             }
         });
     }
-
 
     public function edit($id)
     {

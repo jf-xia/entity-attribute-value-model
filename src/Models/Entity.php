@@ -47,10 +47,15 @@ class Entity extends Model
     {
         return $this->hasMany(AttributeSet::class, 'entity_id');
     }
-        
+
     public function attributes()
     {
         return $this->hasMany(Attribute::class, 'entity_id');
+    }
+
+    public function entity_relations()
+    {
+        return $this->hasMany(EntityRelation::class, 'entity_id');
     }
     
     public static function findByCode($code)

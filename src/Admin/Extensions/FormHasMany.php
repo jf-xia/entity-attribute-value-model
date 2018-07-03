@@ -318,6 +318,11 @@ class FormHasMany extends Field
         return $this->mode('tab');
     }
 
+    public function getValue()
+    {
+        return $this->value;
+    }
+
     /**
      * Build Nested form for related data.
      *

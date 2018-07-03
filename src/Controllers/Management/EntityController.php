@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Eav\Attribute;
 use Eav\AttributeSet;
 use Eav\Entity;
+use Eav\EntityRelation;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
@@ -37,8 +38,7 @@ class EntityController extends Controller
             $grid->column('defaultAttributeSet.attribute_set_name',trans('eav::eav.default_attribute_set_id'));
 //            $grid->column('attributeSet',trans('eav::eav.additional_attribute_table'))
 //                ->pluck('attribute_set_name')->label();
-            $grid->column('is_flat_enabled',trans('eav::eav.is_flat_enabled'))
-                ->display(function($val){return status()[$val];});
+//            $grid->column('is_flat_enabled',trans('eav::eav.is_flat_enabled'))->display(function($val){return status()[$val];});
             $grid->filter(function ($filter)  {
                 $filter->disableIdFilter();
                 $filter->like('entity_code',trans('eav::eav.entity_code'));
@@ -96,7 +96,16 @@ class EntityController extends Controller
             $form->select('default_attribute_set_id',trans('eav::eav.default_attribute_set_id'))
                 ->options(AttributeSet::all()->pluck('attribute_set_name','attribute_set_id'));
 //            $form->column('additional_attribute_table',trans('eav::eav.additional_attribute_table'));
-            $form->select('is_flat_enabled',trans('eav::eav.is_flat_enabled'))->options(status());
+//            $form->select('is_flat_enabled',trans('eav::eav.is_flat_enabled'))->options(status()); //todo flat table
+            $form->subForm('entity_relations',trans('eav::eav.entity_relations'), function (Form\NestedForm $form) {
+                $form->select('relation_type',trans('eav::eav.relation_type'))->options(EntityRelation::relationTypeOption());
+                $form->select('relation_entity_id',trans('eav::eav.relation_entity_id'))->options(
+                    function ($value) {
+                        dd($value,__FUNCTION__,__CLASS__,$this,);
+                    }
+                );
+                $form->select('relation_entity_id',trans('eav::eav.relation_entity_id'))->options(Entity::all()->pluck('entity_name','entity_id'));
+            });
             $form->subForm('attributes',trans('eav::eav.attributes'), function (Form\NestedForm $form) {
 //                $form->display('attribute_id', '');
                 (new \Eav\Controllers\AttributeController)->formFileds($form);

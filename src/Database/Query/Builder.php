@@ -15,7 +15,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class Builder extends QueryBuilder
 {
-    use Attribute;
+    use Attribute, WhereAttrBuilder;
             
     protected $isProcessed = false;
             
@@ -33,7 +33,7 @@ class Builder extends QueryBuilder
     public $attributeOrderBy;
 
     public $attributeColumns;
-    
+
     protected $baseEntity;
 
     public $joinCache = [];
@@ -260,24 +260,6 @@ class Builder extends QueryBuilder
 
         return $this;
     }
-
-    /**
-     * Add a basic where clause to the query. todo where**
-     *
-     * @param  string|array|\Closure  $column
-     * @param  mixed   $operator
-     * @param  mixed   $value
-     * @param  string  $boolean
-     * @return $this
-     */
-//    public function where($column, $operator = null, $value = null, $boolean = 'and')
-//    {
-//        if (!$this->canUseFlat()) {
-//            $column = $column.'_attr.value';
-//        }
-//        parent::where($column, $operator = null, $value = null, $boolean = 'and');
-//        return $this;
-//    }
     
     
     /**
