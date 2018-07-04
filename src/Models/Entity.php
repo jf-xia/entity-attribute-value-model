@@ -50,7 +50,12 @@ class Entity extends Model
 
     public function attributes()
     {
-        return $this->hasMany(Attribute::class, 'entity_id');
+        return $this->hasManyThrough(Attribute::class, EntityAttribute::class, 'entity_id', 'attribute_id');
+    }
+
+    public function attributes_form()
+    {
+        return $this->hasMany(Attribute::class,'entity_id');
     }
 
     public function entity_relations()
@@ -86,7 +91,7 @@ class Entity extends Model
     
     public function defaultAttributeSet()
     {
-        return $this->hasOne(AttributeSet::class, 'attribute_set_id', 'default_attribute_set_id');
+        return $this->hasOne(AttributeSet::class, 'entity_id', 'entity_id');
     }
     
     public function describe()

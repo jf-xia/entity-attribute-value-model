@@ -72,6 +72,7 @@ class EntityMigrateMakeCommand extends Command
         $this->call('eav:make:model', ['name' => $class, '--entity' => $name]);
 
         $this->composer->dumpAutoloads();
+
     }
 
     /**
@@ -104,4 +105,5 @@ class EntityMigrateMakeCommand extends Command
 
         return $this->laravel->databasePath().'/migrations';
     }
+
 }

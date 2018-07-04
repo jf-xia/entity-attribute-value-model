@@ -4,6 +4,7 @@ namespace Eav\Controllers;
 
 use App\Http\Controllers\Controller;
 use Eav\Attribute;
+use Eav\AttributeGroup;
 use Eav\AttributeSet;
 use Eav\Entity;
 use Eav\EntityRelation;
@@ -13,6 +14,8 @@ use Encore\Admin\Grid;
 use Encore\Admin\Layout\Column;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Validation\Rule;
 
 class EntityController extends Controller
 {
@@ -89,26 +92,38 @@ class EntityController extends Controller
     {
         return Admin::form(Entity::class, function (Form $form) {
             $form->display('entity_id', 'ID');
-            $form->text('entity_name',trans('eav::eav.entity_name'));//->rules('required|unique:entities');
-            $form->text('entity_code',trans('eav::eav.entity_code'));//->rules('required|unique:entities');
+            $form->text('entity_name',trans('eav::eav.entity_name'));
+            $form->text('entity_code',trans('eav::eav.entity_code'));//todo unique
             $form->text('entity_class',trans('eav::eav.entity_class'));//->rules('required|unique:entities');
             $form->text('entity_table',trans('eav::eav.entity_table'));//->rules('required|unique:entities');
-            $form->select('default_attribute_set_id',trans('eav::eav.default_attribute_set_id'))
-                ->options(AttributeSet::all()->pluck('attribute_set_name','attribute_set_id'));
+//            $form->select('default_attribute_set_id',trans('eav::eav.default_attribute_set_id'))
+//                ->options(AttributeSet::all()->pluck('attribute_set_name','attribute_set_id'));
 //            $form->column('additional_attribute_table',trans('eav::eav.additional_attribute_table'));
 //            $form->select('is_flat_enabled',trans('eav::eav.is_flat_enabled'))->options(status()); //todo flat table
             $form->subForm('entity_relations',trans('eav::eav.entity_relations'), function (Form\NestedForm $form) {
                 $form->select('relation_type',trans('eav::eav.relation_type'))->options(EntityRelation::relationTypeOption());
-                $form->select('relation_entity_id',trans('eav::eav.relation_entity_id'))->options(
-                    function ($value) {
-                        dd($value,__FUNCTION__,__CLASS__,$this,);
-                    }
-                );
                 $form->select('relation_entity_id',trans('eav::eav.relation_entity_id'))->options(Entity::all()->pluck('entity_name','entity_id'));
             });
-            $form->subForm('attributes',trans('eav::eav.attributes'), function (Form\NestedForm $form) {
+            $form->subForm('attributes_form',trans('eav::eav.attributes'), function (Form\NestedForm $form) {
 //                $form->display('attribute_id', '');
                 (new \Eav\Controllers\AttributeController)->formFileds($form);
+            });
+            $form->saving(function($form){
+                //($form->model());
+                if (!class_exists(Input::get('entity_class'))){
+                    \Artisan::call('eav:make:entity',[
+                        'name'=>Input::get('entity_code'),
+                        'class'=>Input::get('entity_class'),
+//                        '--path'=>'app/Models/Eav', //todo Models path change
+                    ]);
+                    \Artisan::call('migrate');
+                }
+            });
+            $form->saved(function($form){
+                if (!$form->model()->defaultAttributeSet){
+                    $attributeSet = AttributeSet::create(['entity_id'=>$form->model()->entity_id,'attribute_set_name'=>'基本']);
+                    AttributeGroup::create(['attribute_set_id'=>$attributeSet->attribute_set_id,'attribute_group_name'=>'基本','order'=>0]);
+                }
             });
         });
     }

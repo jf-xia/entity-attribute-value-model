@@ -5,6 +5,7 @@ namespace Eav\Controllers;
 use App\Http\Controllers\Controller;
 use App\Products;
 use Eav\Attribute;
+use Eav\AttributeGroup;
 use Eav\Entity;
 use Eav\EntityAttribute;
 use Encore\Admin\Controllers\Dashboard;
@@ -141,10 +142,10 @@ class LadminController extends Controller
     {
         return Admin::form($this->entity->entity_class, function (Form $form) {
             $form->id('id','ID');
-            foreach ($this->attrsOnGroup()->groupBy('attribute_group_id') as $attrGroup) {
-                $form->tab($attrGroup->first()->attribute_group->attribute_group_name, function ($form) use ($attrGroup) {
-                    foreach ($attrGroup as $entityAttr) {
-                        $attr = $entityAttr->attribute;
+            //todo get attribute_set_id
+            foreach ($this->entity->defaultAttributeSet->attribute_group as $attrGroup) {
+                $form->tab($attrGroup->attribute_group_name, function ($form) use ($attrGroup) {
+                    foreach ($attrGroup->attributes as $attr) {
                         $attField = $form->{$attr->frontend_type}($attr->attribute_code,$attr->frontend_label);
                         if ($attr->frontend_type == 'select' || $attr->frontend_type == 'multipleSelect' ||
                             $attr->frontend_type == 'checkbox' || $attr->frontend_type == 'radio')
@@ -167,14 +168,17 @@ class LadminController extends Controller
 
     private function attrs()
     {
-        return Attribute::where('entity_id',$this->entity->entity_id)->get();
+//        return Attribute::where('entity_id',$this->entity->entity_id)->get();
+        return $this->entity->attributes;
     }
 
     private function attrsOnGroup()
-    {//todo get attribute_set_id
-        $attribute_set_id = false ? : $this->entity->default_attribute_set_id;
-        return EntityAttribute::where('entity_id',$this->entity->entity_id)
-            ->where('attribute_set_id',$attribute_set_id)->with(['attribute','attribute_group'])->get();
+    {//todo
+//        $attribute_set_id = false ? : $this->entity->default_attribute_set_id;
+//        ->firstWhere('attribute_set_id',$attribute_set_id);//->with('attributes')->get()
+        $attrsOnGroup = $this->entity->defaultAttributeSet->attribute_group;
+        dd($attrsOnGroup);
+        return $attrsOnGroup;
     }
 
 //    public function test()

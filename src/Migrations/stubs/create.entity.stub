@@ -102,7 +102,7 @@ class DummyClass extends Migration
 			$table->index('attribute_id');
 			$table->index('entity_id');        	  
         });
-        
+        /** todo improve CURD data base migration
         $entity = Entity::create([
         	'entity_code' => 'DummyTable',
         	'entity_class' => 'DummyBaseClass',
@@ -124,6 +124,7 @@ class DummyClass extends Migration
         ]);
 
         $this->addTimeStampAttributes();
+        **/
                 
     }
 
@@ -134,7 +135,8 @@ class DummyClass extends Migration
      */
     public function down()
     {
-        $this->removeTimeStampAttributes();
+
+        //$this->removeTimeStampAttributes();
         
     	Schema::drop('DummyTable_datetime');
         Schema::drop('DummyTable_decimal');
@@ -142,7 +144,7 @@ class DummyClass extends Migration
         Schema::drop('DummyTable_text');
         Schema::drop('DummyTable_varchar');
         
-        
+        /**
         $entity = Entity::where('entity_code', '=', 'DummyTable');               
         $attributeSet = AttributeSet::where('attribute_set_name', '=', 'Default')
         				->where('entity_id', '=', $entity->first()->entity_id);
@@ -153,7 +155,7 @@ class DummyClass extends Migration
         $attributeGroup->delete();
         $attributeSet->delete();
         $entity->delete();
-        
+        **/
     }
 
 

@@ -94,14 +94,14 @@ class AttributeController extends Controller
 
     public function formFileds($form)
     {
-        $form->text('attribute_code',trans('eav::eav.attribute_code'))->rules('unique:attributes');
-        $form->text('backend_class',trans('eav::eav.backend_class'));
+        $form->text('attribute_code',trans('eav::eav.attribute_code'));//->rules('unique:attributes');
+//        $form->text('backend_class',trans('eav::eav.backend_class'));
         $form->select('backend_type',trans('eav::eav.backend_type'))->options(Attribute::backendType())->rules('required');
-        $form->text('backend_table',trans('eav::eav.backend_table'));
-        $form->text('frontend_class',trans('eav::eav.frontend_class'));
+//        $form->text('backend_table',trans('eav::eav.backend_table'));
+//        $form->text('frontend_class',trans('eav::eav.frontend_class'));
         $form->select('frontend_type',trans('eav::eav.frontend_type'))->options(Attribute::frontendType())->rules('required');
         $form->text('frontend_label',trans('eav::eav.frontend_label'));
-        $form->text('source_class',trans('eav::eav.source_class'));
+//        $form->text('source_class',trans('eav::eav.source_class'));
         $form->text('default_value',trans('eav::eav.default_value'));
         $form->select('is_filterable',trans('eav::eav.is_filterable'))->options(status())->rules('required');
         $form->select('is_searchable',trans('eav::eav.is_searchable'))->options(status())->rules('required');

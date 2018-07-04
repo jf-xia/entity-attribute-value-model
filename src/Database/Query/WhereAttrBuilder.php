@@ -161,7 +161,8 @@ trait WhereAttrBuilder
 
     private function whereAttrColumn($column)
     {
-        $isStatic = $this->loadAttributes()->firstWhere('attribute_code',$column)->isStatic();
+        $atrr = $this->loadAttributes()->firstWhere('attribute_code',$column);
+        $isStatic = $atrr ? $atrr->isStatic() : true;
         if (!$this->canUseFlat() && !$isStatic) {
             $column = $column.'_attr.value';
         }

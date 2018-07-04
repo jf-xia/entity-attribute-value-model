@@ -46,4 +46,8 @@
 
 </div>
 
-<style type="text/css">.subForm .input-group-addon, .subForm label { display: none; }.subForm td { min-width: 100px; }</style>
+<style type="text/css">
+    .subForm .input-group-addon, .subForm label { display: none; }
+    .subForm td { min-width: 100px; }
+    .subForm { width: 98%; }
+</style>
