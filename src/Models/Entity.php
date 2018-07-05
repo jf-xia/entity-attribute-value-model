@@ -53,7 +53,7 @@ class Entity extends Model
         return $this->hasManyThrough(Attribute::class, EntityAttribute::class, 'entity_id', 'attribute_id');
     }
 
-    public function attributes_form()
+    public function attributes_form()//todo debug for hasManyThrough in form
     {
         return $this->hasMany(Attribute::class,'entity_id');
     }

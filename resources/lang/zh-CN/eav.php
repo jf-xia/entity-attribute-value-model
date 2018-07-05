@@ -41,6 +41,10 @@ return [
     'attribute_group_id'      =>'属性组ID',
     'attribute_group_name'      =>'组名称',
 
+    'entity_relations'=>'关联表单',
+    'relation_type'=>'关联类型',
+    'relation_entity_id'=>'关联实体',
+
     'attribute'=>'属性',
     'attributes'=>'属性',
     'attribute_code'=>'属性代码',

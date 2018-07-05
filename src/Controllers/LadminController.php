@@ -4,10 +4,13 @@ namespace Eav\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Products;
+use Eav\Admin\Widgets\RelationGrid;
 use Eav\Attribute;
 use Eav\AttributeGroup;
+use Eav\AttributeSet;
 use Eav\Entity;
 use Eav\EntityAttribute;
+use Eav\EntityRelation;
 use Encore\Admin\Controllers\Dashboard;
 use Encore\Admin\Controllers\ModelForm;
 use Encore\Admin\Facades\Admin;
@@ -16,6 +19,8 @@ use Encore\Admin\Grid;
 use Encore\Admin\Layout\Column;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
+use Encore\Admin\Widgets\Box;
+use Encore\Admin\Widgets\Tab;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
@@ -52,23 +57,29 @@ class LadminController extends Controller
     {
         return Admin::grid($this->entity->entity_class, function (Grid $grid) {
             $grid->id('ID')->sortable();
-            foreach ($this->attrs() as $attr) {
-                if (!$attr->not_list && $attr->backend_type<>'text'){
-                    $eavGrid = $grid->column($attr->attribute_code,$attr->frontend_label);
-                    if ($attr->list_field_html) {
-                        //<a target="_blank" href="https://item.jd.com/%value%.html" alt="SKU" >%value%</a>
-                        $eavGrid = $eavGrid->display(function($val) use ($attr){
-                            return $attr->getListHtml($val);
-                        });
-                    }
-                    $eavGrid = $eavGrid->sortable();
-                }
-            }
+            $this->getColumn($grid,$this->getEAttributes());
+            //todo get Columns/Tools/Actions/Export & CURD/RowSelector/Buttons with permission
             $this->getActions($grid);
             $this->getTools($grid);
             $this->getFilter($grid);
 //            $grid->disableExport();
         });
+    }
+
+    public function getColumn($grid,$attrs)
+    {
+        foreach ($attrs as $attr) {
+            if (!$attr->not_list && $attr->backend_type<>'text'){
+                $eavGrid = $grid->column($attr->attribute_code,$attr->frontend_label);
+                if ($attr->list_field_html) {
+                    //<a target="_blank" href="https://item.jd.com/%value%.html" alt="SKU" >%value%</a>
+                    $eavGrid = $eavGrid->display(function($val) use ($attr){
+                        return $attr->getListHtml($val);
+                    });
+                }
+                $eavGrid = $eavGrid->sortable();
+            }
+        }
     }
 
     public function getActions($grid)
@@ -96,7 +107,7 @@ class LadminController extends Controller
     {
         $grid->filter(function ($filter)  {
             $filter->disableIdFilter();
-            foreach ($this->attrs() as $attr) {
+            foreach ($this->getEAttributes() as $attr) {
                 if (!$attr->not_list && $attr->backend_type <> 'text' && $attr->is_filterable) {
                     $ft = $attr->frontend_type;
                     if ($ft == 'select' || $ft == 'radio'){
@@ -120,7 +131,7 @@ class LadminController extends Controller
         $content = Admin::content();
         $content->header($this->entity->entity_name.trans('eav::eav.edit'));
         $content->description($this->entity->entity_desc);
-        $content->body($this->form()->edit($id));
+        $content->body($this->form()->edit($id).$this->formLists());
         return $content;
     }
 
@@ -131,6 +142,35 @@ class LadminController extends Controller
         $content->description($this->entity->entity_desc);
         $content->body($this->form());
         return $content;
+    }
+
+    /**
+     * Make a relation entity list below form.
+     *
+     * @return Form
+     */
+    protected function formLists()
+    {
+        $tab = new Tab();
+        foreach ($this->entity->entity_relations as $entity_relation) {
+            $entity = $entity_relation->relation;
+            $entityObject = $entity->entity_class;
+            $grid = new RelationGrid(new $entityObject(),function(RelationGrid $grid) use ($entity_relation,$entity){//
+                $grid->model()->whereIn('id',$entity_relation->relation2Entitys->pluck('entity_relation_object_id'));
+//                $grid->id('ID')->sortable();
+                $grid->column('',trans('eav::eav.action'))->display(function() use ($entity){
+                    return '<a href="'.admin_url($entity->entity_code.'/'.$this->getKey())
+                        .'/edit" target="_blank" ><i class="fa fa-edit"></i></a>';
+                });
+                $this->getColumn($grid,$entity_relation->relation->attributes);
+                $grid->setBoxFooter('. -- 点击链接查看表单：<a href="'.admin_url($entity->entity_code)
+                    .'" target="_blank" >'.$entity->entity_name.'</a>');
+            });
+//            $tab->dropDown([$entity->entity_name,admin_url($entity->entity_code)]);
+            $tab->add($entity->entity_name,$grid);
+        }
+        $formLists = new Box(trans('eav::eav.entity_relations'),$tab);
+        return $formLists;
     }
 
     /**
@@ -166,7 +206,7 @@ class LadminController extends Controller
         });
     }
 
-    private function attrs()
+    private function getEAttributes()
     {
 //        return Attribute::where('entity_id',$this->entity->entity_id)->get();
         return $this->entity->attributes;

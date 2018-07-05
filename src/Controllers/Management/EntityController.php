@@ -93,8 +93,8 @@ class EntityController extends Controller
         return Admin::form(Entity::class, function (Form $form) {
             $form->display('entity_id', 'ID');
             $form->text('entity_name',trans('eav::eav.entity_name'));
-            $form->text('entity_code',trans('eav::eav.entity_code'));//todo unique
-            $form->text('entity_class',trans('eav::eav.entity_class'));//->rules('required|unique:entities');
+            $form->text('entity_code',trans('eav::eav.entity_code'));//todo unique & mask a-z_
+            $form->text('entity_class',trans('eav::eav.entity_class'));//->rules('required|unique:entities'); todo set default base code
             $form->text('entity_table',trans('eav::eav.entity_table'));//->rules('required|unique:entities');
 //            $form->select('default_attribute_set_id',trans('eav::eav.default_attribute_set_id'))
 //                ->options(AttributeSet::all()->pluck('attribute_set_name','attribute_set_id'));
@@ -109,7 +109,7 @@ class EntityController extends Controller
                 (new \Eav\Controllers\AttributeController)->formFileds($form);
             });
             $form->saving(function($form){
-                //($form->model());
+                //($form->model()); todo move it in Action Button
                 if (!class_exists(Input::get('entity_class'))){
                     \Artisan::call('eav:make:entity',[
                         'name'=>Input::get('entity_code'),
