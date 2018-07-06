@@ -15,7 +15,7 @@ trait Attribute
         $attributes = array_unique($attributes);
 
         $alreadyLoadedAttkeys = array_intersect(static::$attributesCollectionKeys, $attributes);
-        
+
         if (count($alreadyLoadedAttkeys) && count($alreadyLoadedAttkeys) == count($attributes)) {
             return static::$attributesCollection->intersectKeys($attributes);
         } elseif (count($alreadyLoadedAttkeys) && count($alreadyLoadedAttkeys) < count($attributes)) {
@@ -31,7 +31,6 @@ trait Attribute
         }
         
         static::$attributesCollectionKeys = array_merge(static::$attributesCollectionKeys, $loadedAttributes->code()->toArray());
-
         return $loadedAttributes;
     }
     

@@ -23,7 +23,7 @@ class AttributeController extends Controller
         $content->description('...');
 
         $grid = Admin::grid(Attribute::class, function (Grid $grid) {
-            $grid->column('attribute_id','ID')->sortable();
+            $grid->column('id','ID')->sortable();
             $grid->column('entity.entity_name',trans('eav::eav.entity'));
             $grid->column('attribute_code',trans('eav::eav.attribute_code'));
             $grid->column('backend_class',trans('eav::eav.backend_class'));
@@ -81,7 +81,7 @@ class AttributeController extends Controller
     protected function form()
     {
         return Admin::form(Attribute::class, function (Form $form) {
-            $form->display('attribute_id', 'ID')->setElementName();
+            $form->display('id', 'ID');
             $form->select('entity_id',trans('eav::eav.entity'))->options(Entity::all()->pluck('entity_name','entity_id'))->rules('required');
             $this->formFileds($form);
             $form->subForm('option',trans('eav::eav.option'), function (Form\NestedForm $form) {
@@ -103,12 +103,16 @@ class AttributeController extends Controller
         $form->text('frontend_label',trans('eav::eav.frontend_label'));
 //        $form->text('source_class',trans('eav::eav.source_class'));
         $form->text('default_value',trans('eav::eav.default_value'));
+        $form->select('not_list',trans('eav::eav.not_list'))->options(status())->rules('required');
+        $form->select('not_report',trans('eav::eav.not_report'))->options(status())->rules('required');
+        $form->select('is_unique',trans('eav::eav.is_unique'))->options(status())->rules('required');
         $form->select('is_filterable',trans('eav::eav.is_filterable'))->options(status())->rules('required');
         $form->select('is_searchable',trans('eav::eav.is_searchable'))->options(status())->rules('required');
         $form->select('is_required',trans('eav::eav.is_required'))->options(status())->rules('required');
         $form->text('required_validate_class',trans('eav::eav.required_validate_class'));
         $form->text('order',trans('eav::eav.order'));
         $form->text('list_field_html',trans('eav::eav.list_field_html'));
+        //todo form_field_html form
         $form->text('help',trans('eav::eav.help'));
         $form->text('placeholder',trans('eav::eav.placeholder'));
     }

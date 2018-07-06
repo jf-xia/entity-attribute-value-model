@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class EntityAttribute extends Model
 {
     protected $primaryKey = 'attribute_id';
-    
+
     public $timestamps = false;
     
     protected $fillable = [
@@ -18,22 +18,22 @@ class EntityAttribute extends Model
 
     public function entity()
     {
-        return $this->belongsTo(Entity::class, 'entity_id', 'entity_id');
+        return $this->belongsTo(Entity::class, 'entity_id', 'id');
     }
 
     public function attribute_set()
     {
-        return $this->belongsTo(AttributeSet::class, 'attribute_set_id', 'attribute_set_id');
+        return $this->belongsTo(AttributeSet::class, 'attribute_set_id', 'id');
     }
 
     public function attribute_group()
     {
-        return $this->belongsTo(AttributeGroup::class, 'attribute_group_id', 'attribute_group_id');
+        return $this->belongsTo(AttributeGroup::class, 'attribute_group_id', 'id');
     }
 
     public function attribute()
     {
-        return $this->belongsTo(Attribute::class, 'attribute_id', 'attribute_id');
+        return $this->belongsTo(Attribute::class, 'attribute_id', 'id');
     }
     
     public static function map($data)
@@ -49,10 +49,10 @@ class EntityAttribute extends Model
         $eavAttributeGroup = $instance->findOrCreateGroup($data['attribute_group'], $eavAttributeSet);
         
         $instance->fill([
-            'entity_id' => $eavEntity->entity_id,
-            'attribute_set_id' => $eavAttributeSet->attribute_set_id,
-            'attribute_group_id' => $eavAttributeGroup->attribute_group_id,
-            'attribute_id' => $eavAttribute->attribute_id
+            'entity_id' => $eavEntity->id,
+            'attribute_set_id' => $eavAttributeSet->id,
+            'attribute_group_id' => $eavAttributeGroup->id,
+            'attribute_id' => $eavAttribute->id
         ])->save();
     }
     
@@ -66,8 +66,8 @@ class EntityAttribute extends Model
         $eavAttribute = $instance->findAttribute($data['attribute_code'], $eavEntity);
         
         $instance->where([
-            'entity_id' => $eavEntity->entity_id,
-            'attribute_id' => $eavAttribute->attribute_id
+            'entity_id' => $eavEntity->id,
+            'attribute_id' => $eavAttribute->id
         ])->delete();
     }
     
@@ -85,7 +85,7 @@ class EntityAttribute extends Model
         try {
             return Attribute::where([
                 'attribute_code'=> $code,
-                'entity_id' => $entity->entity_id,
+                'entity_id' => $entity->id,
             ])->firstOrFail();
         } catch (ModelNotFoundException $e) {
             throw new \Exception("Unable to load Attribute : ".$code);
@@ -96,7 +96,7 @@ class EntityAttribute extends Model
     {
         return AttributeSet::firstOrCreate([
             'attribute_set_name' => $code,
-            'entity_id' => $entity->entity_id,
+            'entity_id' => $entity->id,
         ]);
     }
     

@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Entity extends Model
 {
-    protected $primaryKey = 'entity_id';
-    
     protected static $baseEntity = [];
     protected static $entityIdCache = [];
     
@@ -50,7 +48,7 @@ class Entity extends Model
 
     public function attributes()
     {
-        return $this->hasManyThrough(Attribute::class, EntityAttribute::class, 'entity_id', 'attribute_id');
+        return $this->hasManyThrough(Attribute::class, EntityAttribute::class, 'entity_id', 'id');
     }
 
     public function attributes_form()//todo debug for hasManyThrough in form
@@ -58,9 +56,24 @@ class Entity extends Model
         return $this->hasMany(Attribute::class,'entity_id');
     }
 
+    public function relation2Entity()
+    {
+        return $this->hasManyThrough(static::class, EntityRelation::class,'entity_id','id','id','relation_entity_id');//
+    }
+
     public function entity_relations()
     {
         return $this->hasMany(EntityRelation::class, 'entity_id');
+    }
+
+    public function entity_relations_hasmany()
+    {
+        return $this->hasMany(EntityRelation::class, 'entity_id')->where('relation_type','hasMany');
+    }
+
+    public function entity_relations_hasone()
+    {
+        return $this->hasMany(EntityRelation::class, 'entity_id')->where('relation_type','hasOne');
     }
     
     public static function findByCode($code)
@@ -91,7 +104,7 @@ class Entity extends Model
     
     public function defaultAttributeSet()
     {
-        return $this->hasOne(AttributeSet::class, 'entity_id', 'entity_id');
+        return $this->hasOne(AttributeSet::class, 'entity_id');
     }
     
     public function describe()

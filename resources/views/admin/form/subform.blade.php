@@ -6,7 +6,7 @@
 
         <table class="table has-many-{{$column}}-forms subForm">
             <thead><tr>
-                <th><div class="add btn btn-success btn-sm pull-right"><i class="fa fa-plus-square"></i> &nbsp; {{ trans('admin.new') }}</div></th>
+                <th width="100px"><div class="add btn btn-success btn-sm pull-right"><i class="fa fa-plus-square"></i> &nbsp; {{ trans('admin.new') }}</div></th>
                 @foreach($nestedForm->fields() as $field)
                     @if(! $field instanceof \Encore\Admin\Form\Field\Hidden)
                         <th>{!! $field->label() !!}</th>
@@ -14,7 +14,7 @@
                 @endforeach
             </tr></thead><tbody>
         @foreach($forms as $pk => $form)
-            <tr class="has-many-{{$column}}-form">
+            <tr class="has-many-{{$column}}-form fields-group">
                 <td><div class="remove btn btn-warning btn-sm pull-right"><i class="fa fa-trash"></i> @lang('admin.remove')</div></td>
                 @foreach($form->fields() as $field)
                     @if(! $field instanceof \Encore\Admin\Form\Field\Hidden)
@@ -31,7 +31,7 @@
     </div>
 
     <template class="{{$column}}-tpl">
-        <tr class="has-many-{{$column}}-form">
+        <tr class="has-many-{{$column}}-form fields-group">
             <td><div class="remove btn btn-warning btn-sm pull-right"><i class="fa fa-trash"></i> @lang('admin.remove')</div></td>
             @foreach($nestedForm->fields() as $field)
                 @if(! $field instanceof \Encore\Admin\Form\Field\Hidden)

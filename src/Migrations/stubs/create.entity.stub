@@ -112,7 +112,7 @@ class DummyClass extends Migration
         
         $attributeSet = AttributeSet::create([
         	'attribute_set_name' => 'Default',
-        	'entity_id' => $entity->entity_id,
+        	'entity_id' => $entity->id,
         ]);
         
         $entity->default_attribute_set_id = $attributeSet->attribute_set_id;        

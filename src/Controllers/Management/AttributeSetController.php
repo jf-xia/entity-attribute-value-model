@@ -108,13 +108,13 @@ class AttributeSetController extends Controller
     {
         $drows = [];
         $entityAttr = EntityAttribute::where('attribute_set_id', Input::get('set'))->get();
-        $optionAttributeGroup = AttributeGroup::where('attribute_set_id',Input::get('set'))->pluck('attribute_group_name','attribute_group_id');
+        $optionAttributeGroup = AttributeGroup::where('attribute_set_id',Input::get('set'))->pluck('attribute_group_name','id');
         foreach ($rows as $row) {
             $drow=[];
-            $default_attr_group_id = $entityAttr->where('attribute_id',$row['attribute_id'])->first()->attribute_group_id ?? '';
-            $drow['attribute_group_id']=$this->selectAttr('attribute_group_id',$default_attr_group_id,$optionAttributeGroup,$row['attribute_id']);
+            $default_attr_group_id = $entityAttr->where('attribute_id',$row['id'])->first()->attribute_group_id ?? '';
+            $drow['attribute_group_id']=$this->selectAttr('attribute_group_id',$default_attr_group_id,$optionAttributeGroup,$row['id']);
             $drow['attribute_code'] = $row['attribute_code'].
-                '<input name="attr'.$row['attribute_id'].'[attribute_id]" type="hidden" value="'.$row['attribute_id'].'" />';
+                '<input name="attr'.$row['id'].'[attribute_id]" type="hidden" value="'.$row['id'].'" />';
             $drow['frontend_label'] = $row['frontend_label'];
             $drow['frontend_type'] = $row['frontend_type'];
             $drow['order'] = $row['order'];
@@ -153,9 +153,9 @@ class AttributeSetController extends Controller
         $rows = AttributeSet::with('entity')->get()->toArray();
         if ($rows){
             foreach ($rows as &$row) {
-                $row['action']='<a href="'.url(admin_base_path('attributeset')).'?set='.$row['attribute_set_id'].'"><i class="fa fa-edit"></i></a>'.' <a href="'.url(admin_base_path('attr/set')).'/'.$row['attribute_set_id'].'"><i class="fa fa-trash"></i></a>';
+                $row['action']='<a href="'.url(admin_base_path('attributeset')).'?set='.$row['id'].'"><i class="fa fa-edit"></i></a>'.' <a href="'.url(admin_base_path('attr/set')).'/'.$row['id'].'"><i class="fa fa-trash"></i></a>';
                 $row['entity_id']=$row['entity']['entity_name'];
-                unset($row['attribute_set_id']);
+                unset($row['id']);
                 unset($row['entity']);
             }
             unset($row);
@@ -169,9 +169,9 @@ class AttributeSetController extends Controller
     {
         $form = Admin::form(AttributeSet::class,function (Form $form) {
             $form->setAction(admin_base_path('attr/set'));
-            $form->display('attribute_set_id', 'ID');
+            $form->display('id', 'ID');
             $form->select('entity_id', trans('eav::eav.entity'))->rules('required')
-                ->options(Entity::all()->pluck('entity_name','entity_id'));
+                ->options(Entity::all()->pluck('entity_name','id'));
             $form->text('attribute_set_name', trans('eav::eav.attribute_set_name'))->rules('required');
             $form->subForm('attribute_group',trans('eav::eav.attribute_group'), function (Form\NestedForm $form) {
 //                $form->display('attribute_group_id', 'ID');

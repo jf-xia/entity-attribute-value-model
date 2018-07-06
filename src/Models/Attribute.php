@@ -13,8 +13,6 @@ class Attribute extends Model
     use Concerns\QueryBuilder;
 
     const TYPE_STATIC = 'static';
-    
-    protected $primaryKey = 'attribute_id';
 
     public $timestamps = false;
     
@@ -208,7 +206,7 @@ class Attribute extends Model
         
         unset($data['entity_code']);
         
-        $data['entity_id'] = $eavEntity->entity_id;
+        $data['entity_id'] = $eavEntity->id;
         
         $options = [];
         
@@ -239,7 +237,7 @@ class Attribute extends Model
         
         unset($data['entity_code']);
         
-        $data['entity_id'] = $eavEntity->entity_id;
+        $data['entity_id'] = $eavEntity->id;
         
         $instance->where($data)->delete();
     }
@@ -251,7 +249,7 @@ class Attribute extends Model
 
     public function option()
     {
-        return $this->hasMany(AttributeOption::class, 'attribute_id', 'attribute_id');
+        return $this->hasMany(AttributeOption::class, 'attribute_id', 'id');
     }
 
     /**
@@ -416,12 +414,12 @@ class Attribute extends Model
         $k = "{$entityType}|{$code}";
         if (!isset($this->attributeIdCache[$k])) {
             $attribute = \DB::table($this->getTable())
-                ->select('attribute_id')
+                ->select('id')
                 ->where('attribute_code', $code)
                 ->where('entity_id', $entityType)
                 ->first();
             if ($attribute) {
-                $this->attributeIdCache[$k] = $attribute->attribute_id;
+                $this->attributeIdCache[$k] = $attribute->id;
             } else {
                 return null;
             }
@@ -458,7 +456,7 @@ class Attribute extends Model
 
     public function entity()
     {
-        return $this->belongsTo(Entity::class, 'entity_id', 'entity_id');
+        return $this->belongsTo(Entity::class, 'entity_id', 'id');
     }
 
     public function getListHtml($value)

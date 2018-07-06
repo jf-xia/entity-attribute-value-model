@@ -15,6 +15,7 @@ Route::group([
         $router->resource($entity->entity_code, 'LadminController');
     }
     $router->resource('/entity', 'EntityController');
+    $router->get('/entity/ajax/attrs', 'EntityController@getDisplayAttrsAjax');
     $router->resource('/attribute', 'AttributeController');
     $router->resource('/attributeset', 'AttributeSetController');
     $router->any('/attr/set', 'AttributeSetController@attrSetStore');

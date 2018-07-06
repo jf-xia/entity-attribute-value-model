@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class EntityRelationId extends Model
 {
-    protected $primaryKey = 'entity_relation_ids_id';
-
     protected $fillable = [
         'entity_relation_id', 'entity_object_id', 'entity_relation_object_id',
     ];

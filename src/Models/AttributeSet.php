@@ -6,23 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class AttributeSet extends Model
 {
-
-    protected $primaryKey = 'attribute_set_id';
-    
     public $timestamps = false;
     
     protected $fillable = [
         'attribute_set_name' , 'entity_id'
     ];
 
-    public function attributes()
-    {
-        return $this->hasManyThrough(Attribute::class, EntityAttribute::class, 'attribute_set_id', 'attribute_id');
-    }
+//    public function attributes()
+//    {
+//        return $this->hasManyThrough(Attribute::class, EntityAttribute::class, 'attribute_set_id', 'attribute_id');
+//    }
 
     public function entity()
     {
-        return $this->belongsTo(Entity::class, 'entity_id', 'entity_id');
+        return $this->belongsTo(Entity::class, 'entity_id', 'id');
     }
     
     public function attribute_group()

@@ -19,6 +19,8 @@ return [
     'action'            => '操作',
     'order'            => '排序',
     'reset'        => '重置',
+    'created_at'        => '创建时间',
+    'updated_at'        => '更新时间',
 
 
     'entity'                        =>'业务实体',
@@ -44,6 +46,7 @@ return [
     'entity_relations'=>'关联表单',
     'relation_type'=>'关联类型',
     'relation_entity_id'=>'关联实体',
+    'display_attr_id'=>'关联显示字段',
 
     'attribute'=>'属性',
     'attributes'=>'属性',
@@ -56,6 +59,9 @@ return [
     'frontend_label'=>'前端标签',
     'source_class'=>'源标签',
     'default_value'=>'默认值',
+    'not_list'	=>	'忽略列表字段',
+    'not_report'	=>	'忽略报告字段',
+    'is_unique'	=>	'唯一验证',
     'is_filterable'=>'过滤字段',
     'is_searchable'=>'搜索字段',
     'is_required'=>'必填字段',

@@ -152,7 +152,7 @@ class LadminController extends Controller
     protected function formLists()
     {
         $tab = new Tab();
-        foreach ($this->entity->entity_relations as $entity_relation) {
+        foreach ($this->entity->entity_relations_hasmany as $entity_relation) {
             $entity = $entity_relation->relation;
             $entityObject = $entity->entity_class;
             $grid = new RelationGrid(new $entityObject(),function(RelationGrid $grid) use ($entity_relation,$entity){//
@@ -161,6 +161,7 @@ class LadminController extends Controller
                 $grid->column('',trans('eav::eav.action'))->display(function() use ($entity){
                     return '<a href="'.admin_url($entity->entity_code.'/'.$this->getKey())
                         .'/edit" target="_blank" ><i class="fa fa-edit"></i></a>';
+                    //todo delete button
                 });
                 $this->getColumn($grid,$entity_relation->relation->attributes);
                 $grid->setBoxFooter('. -- 点击链接查看表单：<a href="'.admin_url($entity->entity_code)
@@ -193,7 +194,7 @@ class LadminController extends Controller
                         if ($attr->is_required) $attField = $attField->attribute('required','required');
                         if ($attr->is_unique) $attField = $attField->rules(['required',
                             Rule::unique($attr->getBackendTable(),'value')->where(function ($query) use ($attr)
-                                {$query->where('attribute_id',$attr->attribute_id);}
+                                {$query->where('id',$attr->id);}
                             )]);
                         if ($attr->default_value) $attField = $attField->default($attr->default_value);
                         if ($attr->required_validate_class) $attField = $attField->addElementClass($attr->required_validate_class);

@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class AttributeOption extends Model
 {
-    protected $primaryKey = 'option_id';
-    
     public $timestamps = false;
     
     protected $fillable = [
@@ -19,7 +17,7 @@ class AttributeOption extends Model
     {
         foreach ($options as $value => $label) {
             $option = static::create([
-                'attribute_id' => $attribute->attribute_id,
+                'attribute_id' => $attribute->id,
                 'label' => $label,
                 'value' => $value
             ]);
