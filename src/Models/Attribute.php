@@ -527,6 +527,7 @@ class Attribute extends Model
             'html'=>'html',
             'tags'=>'tags',
             'icon'=>'icon',
+            'hasone'=>'hasone',
             'multipleFile'=>'multipleFile',
             'multipleImage'=>'multipleImage',
             'captcha'=>'captcha',

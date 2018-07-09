@@ -108,7 +108,7 @@ class LadminController extends Controller
         $grid->filter(function ($filter)  {
             $filter->disableIdFilter();
             foreach ($this->getEAttributes() as $attr) {
-                if (!$attr->not_list && $attr->backend_type <> 'text' && $attr->is_filterable) {
+                if ($attr->backend_type <> 'text' && $attr->is_filterable) {//!$attr->not_list &&
                     $ft = $attr->frontend_type;
                     if ($ft == 'select' || $ft == 'radio'){
                         $filter->equal($attr->attribute_code,$attr->frontend_label)->{$ft}($attr->options());
@@ -152,18 +152,19 @@ class LadminController extends Controller
     protected function formLists()
     {
         $tab = new Tab();
-        foreach ($this->entity->entity_relations_hasmany as $entity_relation) {
-            $entity = $entity_relation->relation;
+        //todo edit map to relation entity by entity_relation_ids
+        foreach ($this->entity->entity_relations->groupBy('relation_entity_id') as $entity_relation) {
+            $entity = $entity_relation->first()->relation;
             $entityObject = $entity->entity_class;
             $grid = new RelationGrid(new $entityObject(),function(RelationGrid $grid) use ($entity_relation,$entity){//
-                $grid->model()->whereIn('id',$entity_relation->relation2Entitys->pluck('entity_relation_object_id'));
+                $grid->model()->whereIn('id',$entity_relation->pluck('entity_relation_object_id'));
 //                $grid->id('ID')->sortable();
                 $grid->column('',trans('eav::eav.action'))->display(function() use ($entity){
                     return '<a href="'.admin_url($entity->entity_code.'/'.$this->getKey())
                         .'/edit" target="_blank" ><i class="fa fa-edit"></i></a>';
                     //todo delete button
                 });
-                $this->getColumn($grid,$entity_relation->relation->attributes);
+                $this->getColumn($grid,$entity_relation->first()->relation->attributes);
                 $grid->setBoxFooter('. -- 点击链接查看表单：<a href="'.admin_url($entity->entity_code)
                     .'" target="_blank" >'.$entity->entity_name.'</a>');
             });
@@ -183,11 +184,20 @@ class LadminController extends Controller
     {
         return Admin::form($this->entity->entity_class, function (Form $form) {
             $form->id('id','ID');
+//            $form->text('relation_entity.id','relat');
             //todo get attribute_set_id
             foreach ($this->entity->defaultAttributeSet->attribute_group as $attrGroup) {
                 $form->tab($attrGroup->attribute_group_name, function ($form) use ($attrGroup) {
                     foreach ($attrGroup->attributes as $attr) {
-                        $attField = $form->{$attr->frontend_type}($attr->attribute_code,$attr->frontend_label);
+                        if ($attr->frontend_type == 'hasone') {
+                            if (!$enitiy = Entity::where('entity_code', '=', $attr->attribute_code)->first()) continue;
+                            $entityClass = $enitiy->entity_class;
+                            $attField = $form->select($attr->attribute_code,$attr->frontend_label)->options(
+                                $entityClass::all()->pluck('name','id')
+                            );
+                        } else {
+                            $attField = $form->{$attr->frontend_type}($attr->attribute_code,$attr->frontend_label);
+                        }
                         if ($attr->frontend_type == 'select' || $attr->frontend_type == 'multipleSelect' ||
                             $attr->frontend_type == 'checkbox' || $attr->frontend_type == 'radio')
                             $attField = $attField->options($attr->options());

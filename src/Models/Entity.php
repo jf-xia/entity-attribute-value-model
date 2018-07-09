@@ -14,7 +14,7 @@ class Entity extends Model
     protected $fillable = [
         'entity_code', 'entity_name', 'entity_class', 'entity_table',
         'default_attribute_set_id', 'additional_attribute_table',
-        'is_flat_enabled', 'entity_desc'
+        'relation_entity_ids', 'is_flat_enabled', 'entity_desc'
     ];
     
     public $timestamps = false;
@@ -40,6 +40,18 @@ class Entity extends Model
         }
         return $tableName;
     }
+
+    public function setRelationEntityIdsAttribute($value)
+    {
+        if (is_array($value)){
+            $this->attributes['relation_entity_ids'] = json_encode($value);
+        }
+    }
+
+    public function getRelationEntityIdsAttribute()
+    {
+        return ($ids = $this->attributes['relation_entity_ids']) ? json_decode($ids) : $ids;
+    }
         
     public function attributeSet()
     {
@@ -56,24 +68,16 @@ class Entity extends Model
         return $this->hasMany(Attribute::class,'entity_id');
     }
 
-    public function relation2Entity()
+    public function object_relation()
     {
         return $this->hasManyThrough(static::class, EntityRelation::class,'entity_id','id','id','relation_entity_id');//
     }
 
     public function entity_relations()
     {
-        return $this->hasMany(EntityRelation::class, 'entity_id');
-    }
-
-    public function entity_relations_hasmany()
-    {
-        return $this->hasMany(EntityRelation::class, 'entity_id')->where('relation_type','hasMany');
-    }
-
-    public function entity_relations_hasone()
-    {
-        return $this->hasMany(EntityRelation::class, 'entity_id')->where('relation_type','hasOne');
+        return $this->hasMany(EntityRelation::class, 'entity_id')
+            ->whereIn('relation_entity_id',$this->getRelationEntityIdsAttribute())
+            ->with(['entity','relation']);
     }
     
     public static function findByCode($code)

@@ -24,6 +24,8 @@ abstract class Model extends Eloquent
     protected static $unguarded = true;
 
     protected static $baseEntity = [];
+
+    protected $relation2Entity = null;
     
     /**
      * Create a new Eloquent model instance.
@@ -322,24 +324,43 @@ abstract class Model extends Eloquent
         return true;
     }
 
-    //todo 关联管理模块 m2m表管理
-    public function __call($method, $parameters)
+    public function getRelation2Entity()
     {
-//        \DB::enableQueryLog();//
-//        dd(,\DB::getQueryLog());//
-        if ($relation = $this->baseEntity()->relation2Entity->firstWhere('entity_code',$method)) {
-            $funName = $relation->entity_code;
-            $function = function  {
-
-            }
-            return $this->$method(...$parameters);
+        if (!$this->relation2Entity) {
+            $this->relation2Entity = $this->baseEntity()->relation2Entity;
         }
-        // todo get hasOne relation enitity
-        foreach($this->entity->entity_relations_hasone as $entity_relation){
-            $entityObject = $entity_relation->relation->entity_class;
-            $attr_code = $entity_relation->display_attr_code();
-            dd($attr_code,$entityObject::all(),$entity_relation->getRelation2Entity()->$attr_code);
-        }
-        parent::__call($method, $parameters);
+        return $this->relation2Entity;
     }
+
+//    public function relation_entity()//$entityClass
+//    {
+//        $dd =
+////        \DB::enableQueryLog();//
+////        dd(,\DB::getQueryLog());//
+//        dd($this->baseEntity()->entity_relations->where('relation_type','hasMany'));
+//
+//        // todo get hasOne relation enitity
+//        foreach($this->entity->entity_relations_hasone as $entity_relation){
+//            $entityObject = $entity_relation->relation->entity_class;
+//            $attr_code = $entity_relation->display_attr_code();
+//            dd($attr_code,$entityObject::all(),$entity_relation->getRelation2Entity()->$attr_code);
+//        }
+////        return $this->
+//    }
+
+    //todo 关联管理模块 m2m表管理
+//    public function __call($method, $parameters)
+//    {
+//        if ($method=='relation_entity') dd($method);
+//        if ($relation = $this->getRelation2Entity()->firstWhere('entity_code',$method)) {
+//            $funName = $relation->entity_code;
+//            dd($funName);
+//        }
+////        dd($method);
+//        if (in_array($method, ['increment', 'decrement'])) {
+//            return $this->$method(...$parameters);
+//        }
+//
+//        return $this->newQuery()->$method(...$parameters);
+//    }
 }

@@ -103,6 +103,7 @@ class EntityController extends Controller
             $form->text('entity_code',trans('eav::eav.entity_code'));//todo unique & mask a-z_
             $form->text('entity_class',trans('eav::eav.entity_class'));//->rules('required|unique:entities'); todo set default base code
             $form->text('entity_table',trans('eav::eav.entity_table'));//->rules('required|unique:entities');
+            $form->multipleSelect('relation_entity_ids',trans('eav::eav.entity_relations'))->options(Entity::all()->pluck('entity_name','id'));
 //            $form->select('default_attribute_set_id',trans('eav::eav.default_attribute_set_id'))
 //                ->options(AttributeSet::all()->pluck('attribute_set_name','attribute_set_id'));
 //            $form->column('additional_attribute_table',trans('eav::eav.additional_attribute_table'));
@@ -110,17 +111,17 @@ class EntityController extends Controller
             $form->subForm('attributes_form',trans('eav::eav.attributes'), function (Form\NestedForm $form) {
                 (new \Eav\Controllers\AttributeController)->formFileds($form);
             });
-            $form->subForm('entity_relations',trans('eav::eav.entity_relations'), function (Form\NestedForm $form) {
-                $form->select('relation_type',trans('eav::eav.relation_type'))->options(EntityRelation::relationTypeOption());
-                $form->select('relation_entity_id',trans('eav::eav.relation_entity_id'))
-                    ->options(Entity::all()->pluck('entity_name','id'))
-                    ->load('display_attr_id',admin_url('entity/ajax/attrs'),'id','frontend_label');
-                $form->select('display_attr_id',trans('eav::eav.display_attr_id'))
-                    ->options(function ($id) {
-                        return ($attr = Attribute::find($id)) ? (Attribute::where('entity_id',$attr->entity_id)
-                            ->pluck('frontend_label','id')->union([0=>'(Null)'])) : [0=>'(Null)'];
-                    });
-            });
+//            $form->subForm('entity_relations',trans('eav::eav.entity_relations'), function (Form\NestedForm $form) {
+//                $form->select('relation_type',trans('eav::eav.relation_type'))->options(EntityRelation::relationTypeOption());
+//                $form->select('relation_entity_id',trans('eav::eav.relation_entity_id'))
+//                    ->options(Entity::all()->pluck('entity_name','id'))
+//                    ->load('display_attr_id',admin_url('entity/ajax/attrs'),'id','frontend_label');
+//                $form->select('display_attr_id',trans('eav::eav.display_attr_id'))
+//                    ->options(function ($id) {
+//                        return ($attr = Attribute::find($id)) ? (Attribute::where('entity_id',$attr->entity_id)
+//                            ->pluck('frontend_label','id')->union([0=>'(Null)'])) : [0=>'(Null)'];
+//                    });
+//            });
             $this->formOnSave($form);
         });
     }
@@ -139,6 +140,7 @@ class EntityController extends Controller
             }
         });
         $form->saved(function($form){
+            //todo set default attrSet where create new attr
             if (!$form->model()->defaultAttributeSet){
                 $attributeSet = AttributeSet::create(['entity_id'=>$form->model()->id,'attribute_set_name'=>'基本']);
                 $attributeGroup = AttributeGroup::create(
