@@ -3,10 +3,10 @@
 return [
     'list'         => '列表',
     'new'          => '新增',
-    'create'       => '创建',
-    'delete'       => '删除',
     'remove'       => '移除',
     'edit'         => '编辑',
+    'create'       => '创建',
+    'delete'       => '删除',
     'view'         => '查看',
     'browse'       => '浏览',
     'save'         => '保存',
@@ -77,4 +77,13 @@ return [
     'value'=>'字段值',
 
 
+    //4XX
+    'Error! No permission'=>'错误！ 当前无权限操作',
+    'Sorry'=>'抱歉',
+    'You do not have permission!'=>'您没有该业务的操作权限！',
+    'Back home'=>'返回首页',
+    'Return to previous step'=>'返回上一步',
+    'If you have any questions, please contact system administrator'=>'如有疑问，请邮件联系系统管理员',
+    'Error! Page not found.'=>'错误，页面不存在.',
+    'The page you entered was not found!'=>'您输入的页面我们没有找到！',
 ];

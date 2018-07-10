@@ -35,6 +35,8 @@ class LadminController extends Controller
 
     private $entity;
 
+    private $eavModel;
+
     public function __construct()
     {
         $this->entityCode = explode('.',Route::currentRouteName())[0];
@@ -57,8 +59,8 @@ class LadminController extends Controller
     {
         return Admin::grid($this->entity->entity_class, function (Grid $grid) {
             $grid->id('ID')->sortable();
-            $this->getColumn($grid,$this->getEAttributes());
-            //todo get Columns/Tools/Actions/Export & CURD/RowSelector/Buttons with permission
+            $this->getColumn($grid,$this->entity->attributes);
+            //todo 2 get Columns/Tools/Actions/Export & CURD/RowSelector/Buttons with permission
             $this->getActions($grid);
             $this->getTools($grid);
             $this->getFilter($grid);
@@ -107,7 +109,7 @@ class LadminController extends Controller
     {
         $grid->filter(function ($filter)  {
             $filter->disableIdFilter();
-            foreach ($this->getEAttributes() as $attr) {
+            foreach ($this->entity->attributes as $attr) {
                 if ($attr->backend_type <> 'text' && $attr->is_filterable) {//!$attr->not_list &&
                     $ft = $attr->frontend_type;
                     if ($ft == 'select' || $ft == 'radio'){
@@ -128,6 +130,8 @@ class LadminController extends Controller
 
     public function edit($id)
     {
+        $modelClass = $this->entity->entity_class;
+        $this->eavModel = $modelClass::find($id);
         $content = Admin::content();
         $content->header($this->entity->entity_name.trans('eav::eav.edit'));
         $content->description($this->entity->entity_desc);
@@ -137,6 +141,7 @@ class LadminController extends Controller
 
     public function create()
     {
+        //todo 2 set attribute_set_id
         $content = Admin::content();
         $content->header($this->entity->entity_name.trans('eav::eav.create'));
         $content->description($this->entity->entity_desc);
@@ -152,7 +157,7 @@ class LadminController extends Controller
     protected function formLists()
     {
         $tab = new Tab();
-        //todo edit map to relation entity by entity_relation_ids
+        //todo 2 edit map to relation entity by entity_relation_ids 关联管理模块 m2m表管理
         foreach ($this->entity->entity_relations->groupBy('relation_entity_id') as $entity_relation) {
             $entity = $entity_relation->first()->relation;
             $entityObject = $entity->entity_class;
@@ -162,7 +167,7 @@ class LadminController extends Controller
                 $grid->column('',trans('eav::eav.action'))->display(function() use ($entity){
                     return '<a href="'.admin_url($entity->entity_code.'/'.$this->getKey())
                     .'/edit" target="_blank" ><i class="fa fa-edit"></i></a>';
-                    //todo delete button
+                    //todo 4 delete button
                 });
                 $this->getColumn($grid,$entity_relation->first()->relation->attributes);
                 $grid->setBoxFooter('. -- 点击链接查看表单：<a href="'.admin_url($entity->entity_code)
@@ -184,17 +189,20 @@ class LadminController extends Controller
     {
         return Admin::form($this->entity->entity_class, function (Form $form) {
             $form->id('id','ID');
-//            $form->text('relation_entity.id','relat');
-            //todo get attribute_set_id
-            foreach ($this->entity->defaultAttributeSet->attribute_group as $attrGroup) {
+            $attrSet = $this->eavModel ? $this->eavModel->attributeSet : $this->entity->defaultAttributeSet;
+            foreach ($attrSet->attribute_group as $attrGroup) {
                 $form->tab($attrGroup->attribute_group_name, function ($form) use ($attrGroup) {
                     foreach ($attrGroup->attributes as $attr) {
                         if ($attr->frontend_type == 'hasone') {
-                            if (!$enitiy = Entity::where('entity_code', '=', $attr->attribute_code)->first()) continue;
-                            $entityClass = $enitiy->entity_class;
+                            list($entity_code,$attrOptionsName) = explode('-',$attr->attribute_code.'-');
+                            $attrOptionsName = $attrOptionsName ? : 'name';
+                            if (!$enitiy = Entity::where('entity_code', '=', $entity_code)->first()) continue;
                             $attField = $form->select($attr->attribute_code,$attr->frontend_label)->options(
-                                $entityClass::all(['name','id'])->pluck('name','id')
-                            );
+                                function ($id) use ($enitiy,$attrOptionsName) {
+                                    $entityClass = $enitiy->entity_class;
+                                    $model = $entityClass::find($id);
+                                    return $model ? [$model->id => $model->$attrOptionsName] : [];
+                                })->ajax('/admin/entity/ajax/options?entity='.base64_encode($enitiy->entity_class).'&option='.$attrOptionsName);
                         } else {
                             $attField = $form->{$attr->frontend_type}($attr->attribute_code,$attr->frontend_label);
                         }
@@ -202,61 +210,20 @@ class LadminController extends Controller
                             $attr->frontend_type == 'checkbox' || $attr->frontend_type == 'radio')
                             $attField = $attField->options($attr->options());
                         if ($attr->is_required) $attField = $attField->attribute('required','required');
-//                        if ($attr->is_unique) $attField = $attField->rules(['required',
-//                            Rule::unique($attr->getBackendTable(),'value')->ignore($id)->where(function ($query) use ($attr)
-//                                {$query->where('attribute_id',$attr->id);}
-//                            )]);//todo unique
+                        if ($attr->is_unique) $attField = $attField->rules(['required',
+                            Rule::unique($attr->getBackendTable(),'value')
+                                ->where(function ($query) use ($attr,$form)
+                                    {$query->where('attribute_id',$attr->id)->where('entity_id','<>',$form->model()->id);}
+                            )]);
                         if ($attr->default_value) $attField = $attField->default($attr->default_value);
                         if ($attr->required_validate_class) $attField = $attField->addElementClass($attr->required_validate_class);
                         if ($attr->placeholder) $attField = $attField->placeholder($attr->placeholder);
                         if ($attr->help) $attField = $attField->help($attr->help);
-                        //todo form_field_html
+                        //todo 4 form_field_html
                     }
                 });
             }
         });
     }
 
-    private function getEAttributes()
-    {
-//        return Attribute::where('entity_id',$this->entity->entity_id)->get();
-        return $this->entity->attributes;
-    }
-
-    private function attrsOnGroup()
-    {//todo
-//        $attribute_set_id = false ? : $this->entity->default_attribute_set_id;
-//        ->firstWhere('attribute_set_id',$attribute_set_id);//->with('attributes')->get()
-        $attrsOnGroup = $this->entity->defaultAttributeSet->attribute_group;
-        dd($attrsOnGroup);
-        return $attrsOnGroup;
-    }
-
-//    public function test()
-//    {
-////        $content->row(Dashboard::title());
-////        $product = Products::whereAttribute('name','ddd')->get();
-//        //$product = Products::all(['attr.*'])->where('name','ddd');
-//        $grid = '';
-//        $entities = Entity::all();
-//        foreach ($entities as $entity) {
-//            $grid .= Admin::grid($entity->entity_class, function (Grid $grid) use ($entity) {
-//                $grid->id('ID')->sortable();
-//                $attrs = Attribute::where('entity_id',$entity->entity_id)->get();
-//                foreach ($attrs as $attr) {
-//                    $grid->column($attr->attribute_code,$attr->frontend_label);
-//                }
-//            });
-//        }
-//        $content->body($grid);
-//        return $content;
-////        $product->name= 'dsafdasfafd';
-////        $product->save();
-////        \DB::enableQueryLog();
-////        dd($product,\DB::getQueryLog());
-////        dd(Products::class);
-////        dd($content);
-////        $content->row(function (Row $row) {});
-//
-//    }
 }

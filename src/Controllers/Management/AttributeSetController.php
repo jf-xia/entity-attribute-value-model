@@ -25,7 +25,7 @@ class AttributeSetController extends Controller
     use ModelForm;
     public function index()
     {
-        //todo reconstruction AttributeSetController to AttributeController
+        //todo 3 reconstruction AttributeSetController to AttributeController
         $content = Admin::content();
         $content->header(trans('eav::eav.attributes').trans('eav::eav.list'));
         $content->description('...');
@@ -148,7 +148,7 @@ class AttributeSetController extends Controller
 
     public function attrSetGrid()
     {
-        //todo table extend
+        //todo 3 table extend
         $grid = new \Encore\Admin\Widgets\Table();
         $rows = AttributeSet::with('entity')->get()->toArray();
         if ($rows){

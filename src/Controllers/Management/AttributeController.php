@@ -112,7 +112,7 @@ class AttributeController extends Controller
         $form->text('required_validate_class',trans('eav::eav.required_validate_class'));
         $form->text('order',trans('eav::eav.order'));
         $form->text('list_field_html',trans('eav::eav.list_field_html'));
-        //todo form_field_html form
+        //todo 3 form_field_html form
         $form->text('help',trans('eav::eav.help'));
         $form->text('placeholder',trans('eav::eav.placeholder'));
     }

@@ -9,6 +9,10 @@ use Eav\AttributeSet;
 use Eav\Entity;
 use Eav\EntityAttribute;
 use Eav\EntityRelation;
+use Encore\Admin\Auth\Database\Administrator;
+use Encore\Admin\Auth\Database\Menu;
+use Encore\Admin\Auth\Database\Permission;
+use Encore\Admin\Auth\Database\Role;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
@@ -20,8 +24,9 @@ use Illuminate\Validation\Rule;
 
 class EntityController extends Controller
 {
+    private $entity;
 
-    /** todo Report & chartjs setting & default by option group Pie, count Bar & Scatter, value Line, skills Radar & Polar area
+    /** todo 2 Report & chartjs setting & default by option group Pie, count Bar & Scatter, value Line, skills Radar & Polar area
      *
      * @return Content
      */
@@ -62,6 +67,9 @@ class EntityController extends Controller
      */
     public function edit($id)
     {
+        if (!$this->entity) {
+            $this->entity = Entity::find($id);
+        }
         return Admin::content(function (Content $content) use ($id) {
             $content->header(trans('eav::eav.edit').trans('eav::eav.entity'));
             $content->description('...');
@@ -71,7 +79,7 @@ class EntityController extends Controller
     }
 
     /**
-     * Create interface. todo create with ModelMakeCommand & attrs & m2m & permission & menu
+     * Create interface. todo 1 create with permission & menu
      *
      * @return Content
      */
@@ -90,6 +98,14 @@ class EntityController extends Controller
         return Attribute::where('entity_id',$q)->get(['id','frontend_label']);
     }
 
+    public function getOptionsAjax()
+    {
+        $q = request()->get('q');
+        $entityClass = base64_decode(request()->get('entity'));
+        $optionsName = request()->get('option');
+        return $entityClass::where($optionsName, 'like', "%$q%")->paginate(null, ['id', $optionsName.' as text']);
+    }
+
     /**
      * Make a form builder.
      *
@@ -100,14 +116,14 @@ class EntityController extends Controller
         return Admin::form(Entity::class, function (Form $form) {
             $form->display('id', 'ID');
             $form->text('entity_name',trans('eav::eav.entity_name'));
-            $form->text('entity_code',trans('eav::eav.entity_code'));//todo unique & mask a-z_
-            $form->text('entity_class',trans('eav::eav.entity_class'));//->rules('required|unique:entities'); todo set default base code
+            $form->text('entity_code',trans('eav::eav.entity_code'));//todo 3 unique & mask a-z_-
+            $form->text('entity_class',trans('eav::eav.entity_class'));//->rules('required|unique:entities'); todo 3 set default base code
             $form->text('entity_table',trans('eav::eav.entity_table'));//->rules('required|unique:entities');
             $form->multipleSelect('relation_entity_ids',trans('eav::eav.entity_relations'))->options(Entity::all()->pluck('entity_name','id'));
 //            $form->select('default_attribute_set_id',trans('eav::eav.default_attribute_set_id'))
 //                ->options(AttributeSet::all()->pluck('attribute_set_name','attribute_set_id'));
 //            $form->column('additional_attribute_table',trans('eav::eav.additional_attribute_table'));
-//            $form->select('is_flat_enabled',trans('eav::eav.is_flat_enabled'))->options(status()); //todo flat table
+//            $form->select('is_flat_enabled',trans('eav::eav.is_flat_enabled'))->options(status()); //todo 3 flat table
             $form->subForm('attributes_form',trans('eav::eav.attributes'), function (Form\NestedForm $form) {
                 (new \Eav\Controllers\AttributeController)->formFileds($form);
             });
@@ -129,32 +145,73 @@ class EntityController extends Controller
     public function formOnSave($form)
     {
         $form->saving(function($form){
-            //($form->model()); todo move it in Action Button
+            //($form->model()); todo 3 change it in Action Button
             if (!class_exists(Input::get('entity_class'))){
                 \Artisan::call('eav:make:entity',[
                     'name'=>Input::get('entity_code'),
                     'class'=>Input::get('entity_class'),
-//                        '--path'=>'app/Models/Eav', //todo Models path change
+//                        '--path'=>'app/Models/Eav', //todo 3 Models path change
                 ]);
                 \Artisan::call('migrate');
             }
         });
         $form->saved(function($form){
-            //todo set default attrSet where create new attr
+            //create with ModelMakeCommand & attrs & m2m & set default attrSet where create new attr
             if (!$form->model()->defaultAttributeSet){
-                $attributeSet = AttributeSet::create(['entity_id'=>$form->model()->id,'attribute_set_name'=>'基本']);
-                $attributeGroup = AttributeGroup::create(
-                    ['attribute_set_id'=>$attributeSet->id,'attribute_group_name'=>'基本','order'=>0]);
-                $created_at = Attribute::create(['entity_id'=>$attributeSet->entity_id, 'attribute_code'=>'created_at', 'backend_type'=>'static',
-                    'frontend_type'=>'datetime', 'frontend_label'=>trans('eav::eav.created_at'), 'is_filterable'=>1,]);
-                $updated_at = Attribute::create(['entity_id'=>$attributeSet->entity_id, 'attribute_code'=>'updated_at', 'backend_type'=>'static',
-                    'frontend_type'=>'datetime', 'frontend_label'=>trans('eav::eav.updated_at'), 'is_filterable'=>1,]);
-                EntityAttribute::create(['entity_id'=>$attributeSet->entity_id, 'attribute_set_id'=>$attributeSet->id,
-                    'attribute_group_id'=>$attributeGroup->id, 'attribute_id'=>$created_at->id,]);
-                EntityAttribute::create(['entity_id'=>$attributeSet->entity_id, 'attribute_set_id'=>$attributeSet->id,
-                    'attribute_group_id'=>$attributeGroup->id, 'attribute_id'=>$updated_at->id,]);
+                $this->runSetEntityData($form);
+                $this->runSetAdminData($form);
             }
         });
+    }
+
+    public function runSetAdminData($form)
+    {
+        $model = $form->model();
+        $roleLeader = Role::create([['name' => $model->entity_name.'Leader', 'slug' => $model->entity_code]]);
+        $roleBase = Role::create([['name' => $model->entity_name.'Base', 'slug' => $model->entity_code]]);
+        $roleRelation = Role::create([['name' => $model->entity_name.'Relation', 'slug' => $model->entity_code]]);
+        Administrator::first()->roles()->save($role);
+
+        $en = $model->entity_name;
+        $ec = $model->entity_code;
+        $permission = Permission::insert([//GET,POST,PUT,DELETE,PATCH,OPTIONS,HEAD
+            ['name' => trans('eav::eav.list') . $en, 'slug' => 'list_' . $ec, 'http_method' => 'GET' ,'http_path'=> "/".$ec."*"],
+            ['name' => trans('eav::eav.view') . $en, 'slug' => 'view_' . $ec, 'http_method' => 'GET' ,'http_path'=> "/".$ec."*"],
+            ['name' => trans('eav::eav.create') . $en, 'slug' => 'create_' . $ec, 'http_method' => 'POST' ,'http_path'=> "/".$ec."*"],
+            ['name' => trans('eav::eav.edit') . $en, 'slug' => 'update_' . $ec, 'http_method' => 'PUT,PATCH' ,'http_path'=> "/".$ec."*"],
+            ['name' => trans('eav::eav.delete') . $en, 'slug' => 'delete_' . $ec, 'http_method' => 'DELETE' ,'http_path'=> "/".$ec."*"],
+        ]);
+
+        $role->permissions()->saveMany($permission);
+
+        $menu = Menu::insert([
+            [
+                'parent_id' => 1,
+                'order'     => $model->id,
+                'title'     => $en,
+                'icon'      => 'fa-puzzle-piece',
+                'uri'       => '/'.$ec,
+            ],
+        ]);
+
+        $menu->roles()->save($role);
+    }
+
+    public function runSetEntityData($form)
+    {
+        $attributeSet = AttributeSet::create(['entity_id'=>$form->model()->id,'attribute_set_name'=>'基本']);
+        $attributeGroup = AttributeGroup::create(
+            ['attribute_set_id'=>$attributeSet->id,'attribute_group_name'=>'基本','order'=>0]);
+        Attribute::create(['entity_id'=>$attributeSet->entity_id, 'attribute_code'=>'created_at', 'backend_type'=>'static',
+            'frontend_type'=>'datetime', 'frontend_label'=>trans('eav::eav.created_at'), 'is_filterable'=>1,]);
+        Attribute::create(['entity_id'=>$attributeSet->entity_id, 'attribute_code'=>'updated_at', 'backend_type'=>'static',
+            'frontend_type'=>'datetime', 'frontend_label'=>trans('eav::eav.updated_at'), 'is_filterable'=>1,]);
+        $insertEAs = [];
+        foreach (Attribute::where('entity_id', $attributeSet->entity_id)->get() as $attr) {
+            $insertEAs[] = ['entity_id'=>$attributeSet->entity_id, 'attribute_set_id'=>$attributeSet->id,
+                'attribute_group_id'=>$attributeGroup->id, 'attribute_id'=>$attr->id,];
+        }
+        EntityAttribute::insert($insertEAs);
     }
 
     /**

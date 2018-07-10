@@ -23,6 +23,7 @@ class EavServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+//        $this->loadViewsFrom(__DIR__.'/../resources/views/admin/errors', 'errors');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'eav');
         $this->mergeConfigFrom(__DIR__.'/../config/eav.php', 'eav');
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'eav');
@@ -47,7 +48,7 @@ class EavServiceProvider extends ServiceProvider
      */
     public function register()
     {
-//        todo make app/Models/Eav
+//        todo 4 make app/Models/Eav
 //        $this->directory = config('admin.directory');
 //
 //        if (is_dir($this->directory)) {
