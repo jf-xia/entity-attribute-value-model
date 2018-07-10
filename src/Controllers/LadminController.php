@@ -161,7 +161,7 @@ class LadminController extends Controller
 //                $grid->id('ID')->sortable();
                 $grid->column('',trans('eav::eav.action'))->display(function() use ($entity){
                     return '<a href="'.admin_url($entity->entity_code.'/'.$this->getKey())
-                        .'/edit" target="_blank" ><i class="fa fa-edit"></i></a>';
+                    .'/edit" target="_blank" ><i class="fa fa-edit"></i></a>';
                     //todo delete button
                 });
                 $this->getColumn($grid,$entity_relation->first()->relation->attributes);
@@ -193,7 +193,7 @@ class LadminController extends Controller
                             if (!$enitiy = Entity::where('entity_code', '=', $attr->attribute_code)->first()) continue;
                             $entityClass = $enitiy->entity_class;
                             $attField = $form->select($attr->attribute_code,$attr->frontend_label)->options(
-                                $entityClass::all()->pluck('name','id')
+                                $entityClass::all(['name','id'])->pluck('name','id')
                             );
                         } else {
                             $attField = $form->{$attr->frontend_type}($attr->attribute_code,$attr->frontend_label);
@@ -202,10 +202,10 @@ class LadminController extends Controller
                             $attr->frontend_type == 'checkbox' || $attr->frontend_type == 'radio')
                             $attField = $attField->options($attr->options());
                         if ($attr->is_required) $attField = $attField->attribute('required','required');
-                        if ($attr->is_unique) $attField = $attField->rules(['required',
-                            Rule::unique($attr->getBackendTable(),'value')->where(function ($query) use ($attr)
-                                {$query->where('id',$attr->id);}
-                            )]);
+//                        if ($attr->is_unique) $attField = $attField->rules(['required',
+//                            Rule::unique($attr->getBackendTable(),'value')->ignore($id)->where(function ($query) use ($attr)
+//                                {$query->where('attribute_id',$attr->id);}
+//                            )]);//todo unique
                         if ($attr->default_value) $attField = $attField->default($attr->default_value);
                         if ($attr->required_validate_class) $attField = $attField->addElementClass($attr->required_validate_class);
                         if ($attr->placeholder) $attField = $attField->placeholder($attr->placeholder);
