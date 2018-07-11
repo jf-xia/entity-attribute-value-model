@@ -116,4 +116,9 @@ class AttributeController extends Controller
         $form->text('help',trans('eav::eav.help'));
         $form->text('placeholder',trans('eav::eav.placeholder'));
     }
+
+    public function show($id)
+    {
+        return redirect(route('entity.edit',$id));
+    }
 }

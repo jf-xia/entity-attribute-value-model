@@ -14,7 +14,7 @@ class CreateAttributeSetsTable extends Migration {
 	{
 		Schema::create('attribute_sets', function(Blueprint $table)
 		{
-			$table->increments('attribute_set_id');
+			$table->increments('id');
 			$table->integer('entity_id')->unsigned();
 			$table->string('attribute_set_name', 191);
 			$table->unique(['entity_id','attribute_set_name']);

@@ -21,6 +21,7 @@ return [
     'reset'        => '重置',
     'created_at'        => '创建时间',
     'updated_at'        => '更新时间',
+    'export'        => '导出',
 
 
     'entity'                        =>'业务实体',

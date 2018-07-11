@@ -153,7 +153,9 @@ class AttributeSetController extends Controller
         $rows = AttributeSet::with('entity')->get()->toArray();
         if ($rows){
             foreach ($rows as &$row) {
-                $row['action']='<a href="'.url(admin_base_path('attributeset')).'?set='.$row['id'].'"><i class="fa fa-edit"></i></a>'.' <a href="'.url(admin_base_path('attr/set')).'/'.$row['id'].'"><i class="fa fa-trash"></i></a>';
+                $row['action']='<a href="'.url(admin_base_path('attributeset')).'?set='.$row['id'].'"><i class="fa fa-edit"></i></a>'.
+                    ' <a onclick="if(confirm(\'确认删除吗\')){window.location.href=\''.url(admin_base_path('attr/set')).
+                    '/'.$row['id'].'\';}" href="javascript:void(0);"><i class="fa fa-trash"></i></a>';
                 $row['entity_id']=$row['entity']['entity_name'];
                 unset($row['id']);
                 unset($row['entity']);
@@ -211,75 +213,8 @@ class AttributeSetController extends Controller
         return redirect(url(admin_base_path('attributeset')));
     }
 
-//    public function attrGroupGrid()
-//    {
-//        $grid = new \Encore\Admin\Widgets\Table();
-//        $rows = AttributeGroup::with('attribute_set')->get()->toArray();
-//        if ($rows){
-//            foreach ($rows as &$row) {
-//                $row['action']='<a href="'.url(admin_base_path('attributeset')).'?set='.Input::get('set').'&group='.$row['attribute_group_id'].'"><i class="fa fa-edit"></i></a>'.' <a href="'.url(admin_base_path('attr/group')).'/'.$row['attribute_group_id'].'"><i class="fa fa-trash"></i></a>';
-//                $row['attribute_set_id']=$row['attribute_set']['attribute_set_name'];
-//                unset($row['attribute_group_id']);
-//                unset($row['attribute_set']);
-//            }
-//            unset($row);
-//            $grid->setHeaders(array_map(function($th){return trans('eav::eav.'.$th);},array_keys($rows[0])));
-//            $grid->setRows($rows);
-//        }
-//        return $grid->render();
-//    }
-//
-//    public function attrGroupForm()
-//    {
-//        $form = Admin::form(AttributeGroup::class,function (Form $form) {
-//            $form->setAction(admin_base_path('attr/group'));
-//            $form->display('attribute_group_id', 'ID');
-//            $form->select('attribute_set_id', trans('eav::eav.attribute_set_id'))->rules('required')
-//                ->options(AttributeSet::all()->pluck('attribute_set_name','attribute_set_id'))
-//                ->default(Input::get('set'));
-//            $form->text('attribute_group_name', trans('eav::eav.attribute_group_name'))->rules('required');
-//            $form->number('order', trans('eav::eav.order'))->rules('required');
-//            $form->builder()->addHiddenField((new Form\Field\Hidden('_previous_'))->value(Request::getRequestUri()));
-//            $form->builder()->addHiddenField((new Form\Field\Hidden('group'))->value(Input::get('group')?Input::get('group'):''));
-//            $form->builder()->getTools()->disableListButton();
-//            $form->builder()->getTools()->disableBackButton();
-//        });
-//        if (Input::get('group')) {
-//            $form->edit(Input::get('group'));
-//        }
-//        return $form;
-//    }
-//
-//    public function attrGroupStore()
-//    {
-//        $id = Input::get('_method')=='PUT' ? Input::get('group') : '';
-//        if ($id){
-//            $this->attrGroupForm()->update($id);
-//        } else {
-//            $this->attrGroupForm()->store();
-//        }
-//        return redirect(url(admin_base_path('attributeset')).'?set='.Input::get('set').'&group='.Input::get('group'));
-//    }
-//
-//    public function attrGroupDelete($id)
-//    {
-//        $this->destroy($this->attrGroupForm(),$id);
-//    }
-//
-//    /**
-//     * Remove the specified resource from storage.
-//     *
-//     * @param int $id
-//     *
-//     * @return \Illuminate\Http\Response
-//     */
-//    public function destroy($form,$id)
-//    {
-//        if ($form->destroy($id)) {
-//            admin_toastr(trans('admin.delete_succeeded'));
-//        } else {
-//            admin_toastr(trans('admin.delete_failed'),'error');
-//        }
-//        return redirect(url(admin_base_path('attributeset')));
-//    }
+    public function show($id)
+    {
+        return redirect(route('entity.edit',$id));
+    }
 }

@@ -14,7 +14,7 @@ class AddForeignKeysToAttributeOptionsTable extends Migration {
 	{
 		Schema::table('attribute_options', function(Blueprint $table)
 		{
-			$table->foreign('attribute_id', 'attribute_options_ibfk_1')->references('attribute_id')->on('attributes')->onUpdate('RESTRICT')->onDelete('CASCADE');
+			$table->foreign('attribute_id', 'attribute_options_ibfk_1')->references('id')->on('attributes')->onUpdate('RESTRICT')->onDelete('CASCADE');
 		});
 	}
 

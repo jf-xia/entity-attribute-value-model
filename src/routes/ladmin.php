@@ -17,10 +17,12 @@ Route::group([
     $router->resource('/entity', 'EntityController');
     $router->get('/entity/ajax/attrs', 'EntityController@getDisplayAttrsAjax');
     $router->get('/entity/ajax/options', 'EntityController@getOptionsAjax');
+    $router->any('/attr/set', 'EntityController@attrSetStore');
+    $router->get('/attr/set/{id}', 'EntityController@attrSetDelete');
     $router->resource('/attribute', 'AttributeController');
     $router->resource('/attributeset', 'AttributeSetController');
-    $router->any('/attr/set', 'AttributeSetController@attrSetStore');
-    $router->get('/attr/set/{id}', 'AttributeSetController@attrSetDelete');
+//    $router->any('/attr/set', 'AttributeSetController@attrSetStore');
+//    $router->get('/attr/set/{id}', 'AttributeSetController@attrSetDelete');
     $router->any('/attr/group', 'AttributeSetController@attrGroupStore');
     $router->get('/attr/group/{id}', 'AttributeSetController@attrGroupDelete');
     $router->post('/attr/setmap', 'AttributeSetController@attrMap');

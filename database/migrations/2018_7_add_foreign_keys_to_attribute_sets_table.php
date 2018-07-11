@@ -14,7 +14,7 @@ class AddForeignKeysToAttributeSetsTable extends Migration {
 	{
 		Schema::table('attribute_sets', function(Blueprint $table)
 		{
-			$table->foreign('entity_id', 'attribute_sets_ibfk_1')->references('entity_id')->on('entities')->onUpdate('RESTRICT')->onDelete('CASCADE');
+			$table->foreign('entity_id', 'attribute_sets_ibfk_1')->references('id')->on('entities')->onUpdate('RESTRICT')->onDelete('CASCADE');
 		});
 	}
 

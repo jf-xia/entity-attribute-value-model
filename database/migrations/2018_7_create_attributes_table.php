@@ -14,7 +14,7 @@ class CreateAttributesTable extends Migration {
 	{
 		Schema::create('attributes', function(Blueprint $table)
 		{
-			$table->increments('attribute_id');
+			$table->increments('id');
 			$table->integer('entity_id')->unsigned();
 			$table->string('attribute_code', 50);
 			$table->string('backend_class', 191)->nullable();

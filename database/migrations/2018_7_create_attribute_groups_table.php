@@ -14,7 +14,7 @@ class CreateAttributeGroupsTable extends Migration {
 	{
 		Schema::create('attribute_groups', function(Blueprint $table)
 		{
-			$table->increments('attribute_group_id');
+			$table->increments('id');
 			$table->integer('attribute_set_id')->unsigned();
 			$table->string('attribute_group_name', 191);
 			$table->integer('order')->default(0);

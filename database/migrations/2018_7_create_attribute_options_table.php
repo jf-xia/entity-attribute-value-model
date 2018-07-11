@@ -14,7 +14,7 @@ class CreateAttributeOptionsTable extends Migration {
 	{
 		Schema::create('attribute_options', function(Blueprint $table)
 		{
-			$table->increments('option_id');
+			$table->increments('id');
 			$table->integer('attribute_id')->unsigned()->index('attribute_options_attribute_id_foreign');
 			$table->string('label', 191);
 			$table->string('value', 191);

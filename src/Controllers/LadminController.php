@@ -55,6 +55,11 @@ class LadminController extends Controller
         return $content;
     }
 
+    /**
+     * get Columns/Tools/Actions/Export & CURD/RowSelector/Buttons with permission
+     *
+     * @return Grid
+     */
     public function grid()
     {
         return Admin::grid($this->entity->entity_class, function (Grid $grid) {
@@ -64,7 +69,7 @@ class LadminController extends Controller
             $this->getActions($grid);
             $this->getTools($grid);
             $this->getFilter($grid);
-//            $grid->disableExport();
+            if(!Admin::user()->can('export_'.$this->entity->entity_code)) $grid->disableExport();
         });
     }
 
@@ -86,23 +91,22 @@ class LadminController extends Controller
 
     public function getActions($grid)
     {
-//        $grid->disableCreateButton();
-        if(!Admin::user()->isAdministrator()){
-            $grid->actions(function ($actions) {
-                $actions->disableDelete();
-            });
-        }
+        $entityCode = $this->entity->entity_code;
+        if(!Admin::user()->can('create_'.$entityCode)) $grid->disableCreateButton();
+        $grid->actions(function ($actions) use ($entityCode) {
+            if(!Admin::user()->can('delete_'.$entityCode)) $actions->disableDelete();
+            if(!Admin::user()->can('update_'.$entityCode)) $actions->disableEdit();
+        });
     }
 
     public function getTools($grid)
     {
-        if(!Admin::user()->isAdministrator()){
-            $grid->tools(function ($tools) {
-                $tools->batch(function ($batch) {
-                    $batch->disableDelete();
-                });
+        $entityCode = $this->entity->entity_code;
+        $grid->tools(function ($tools) use ($entityCode) {
+            $tools->batch(function ($batch) use ($entityCode) {
+                if(!Admin::user()->can('delete_'.$entityCode)) $batch->disableDelete();
             });
-        }
+        });
     }
 
     public function getFilter($grid)
@@ -126,6 +130,18 @@ class LadminController extends Controller
                 }
             }
         });
+    }
+
+    public function getAttrsPermission()
+    {
+        //'public_attrs_'.$this->entity->entity_code
+        Admin::user()->can('public_attrs_'.$this->entity->entity_code);
+        return ;
+    }
+
+    public function show($id)
+    {
+        return redirect(route($this->entityCode.'.edit',$id));
     }
 
     public function edit($id)
@@ -222,6 +238,10 @@ class LadminController extends Controller
                         //todo 4 form_field_html
                     }
                 });
+            }
+            if(!Admin::user()->can('update_'.$this->entity->entity_code)) {
+                $form->disableReset();
+                $form->disableSubmit();
             }
         });
     }
