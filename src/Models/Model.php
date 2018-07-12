@@ -312,10 +312,10 @@ abstract class Model extends Eloquent
         return true;
     }
 
-    public function attributeSet()
-    {
-        return $this->belongsTo(AttributeSet::class, 'attribute_set_id','id');
-    }
+//    public function attributeSet()
+//    {
+//        return $this->belongsTo(AttributeSet::class, 'attribute_set_id','id');
+//    }
 
     public function updateAttributes($query, $options, $modelData, $loadedAttributes)
     {

@@ -22,6 +22,7 @@ return [
     'created_at'        => '创建时间',
     'updated_at'        => '更新时间',
     'export'        => '导出',
+    'default'      =>'默认',
 
 
     'entity'                        =>'业务实体',
@@ -30,7 +31,7 @@ return [
     'entity_code'                   =>'业务代码',
     'entity_class'                  =>'类名',
     'entity_table'                  =>'表名',
-    'default_attribute_set_id'      =>'属性集',
+    'default_attribute_set_id'      =>'默认属性集',
     'additional_attribute_table'    =>'附加属性表',
     'is_flat_enabled'               =>'缓存表',
     'enable'                        =>'开启',

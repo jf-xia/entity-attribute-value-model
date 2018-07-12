@@ -11,6 +11,7 @@ use Eav\AttributeSet;
 use Eav\Entity;
 use Eav\EntityAttribute;
 use Eav\EntityRelation;
+use Encore\Admin\Auth\Database\Permission;
 use Encore\Admin\Controllers\Dashboard;
 use Encore\Admin\Controllers\ModelForm;
 use Encore\Admin\Facades\Admin;
@@ -37,10 +38,13 @@ class LadminController extends Controller
 
     private $eavModel;
 
+    private $attrPermissions;
+
     public function __construct()
     {
         $this->entityCode = explode('.',Route::currentRouteName())[0];
         $this->entity = Entity::findByCode($this->entityCode);
+        $this->attrPermissions = Permission::where('slug','like',$this->entity->entity_code.'_%')->get(['slug']);
         if(empty($this->entity)){
             abort(404);
         }
@@ -65,7 +69,7 @@ class LadminController extends Controller
         return Admin::grid($this->entity->entity_class, function (Grid $grid) {
             $grid->id('ID')->sortable();
             $this->getColumn($grid,$this->entity->attributes);
-            //todo 2 get Columns/Tools/Actions/Export & CURD/RowSelector/Buttons with permission
+            //todo permission slug format redesign
             $this->getActions($grid);
             $this->getTools($grid);
             $this->getFilter($grid);
@@ -77,9 +81,10 @@ class LadminController extends Controller
     {
         foreach ($attrs as $attr) {
             if (!$attr->not_list && $attr->backend_type<>'text'){
+                if (!$this->canViewAttr($attr)) continue;
                 $eavGrid = $grid->column($attr->attribute_code,$attr->frontend_label);
                 if ($attr->list_field_html) {
-                    //<a target="_blank" href="https://item.jd.com/%value%.html" alt="SKU" >%value%</a>
+                    //<a target="_blank" href="https://xxx.com/%value%.html" alt="SKU" >%value%</a>
                     $eavGrid = $eavGrid->display(function($val) use ($attr){
                         return $attr->getListHtml($val);
                     });
@@ -87,6 +92,15 @@ class LadminController extends Controller
                 $eavGrid = $eavGrid->sortable();
             }
         }
+    }
+
+    public function canViewAttr($attr)
+    {
+        $slug = $this->entity->entity_code.'_view_'.$attr->attribute_code.'_'.$attr->id;
+        if (!empty($this->attrPermissions->firstWhere('slug',$slug))) {
+            if (!Admin::user()->can($slug)) return false;
+        }
+        return true;
     }
 
     public function getActions($grid)
@@ -115,6 +129,7 @@ class LadminController extends Controller
             $filter->disableIdFilter();
             foreach ($this->entity->attributes as $attr) {
                 if ($attr->backend_type <> 'text' && $attr->is_filterable) {//!$attr->not_list &&
+                    if (!$this->canViewAttr($attr)) continue;
                     $ft = $attr->frontend_type;
                     if ($ft == 'select' || $ft == 'radio'){
                         $filter->equal($attr->attribute_code,$attr->frontend_label)->{$ft}($attr->options());
@@ -130,13 +145,6 @@ class LadminController extends Controller
                 }
             }
         });
-    }
-
-    public function getAttrsPermission()
-    {
-        //'public_attrs_'.$this->entity->entity_code
-        Admin::user()->can('public_attrs_'.$this->entity->entity_code);
-        return ;
     }
 
     public function show($id)
@@ -205,14 +213,18 @@ class LadminController extends Controller
     {
         return Admin::form($this->entity->entity_class, function (Form $form) {
             $form->id('id','ID');
-            $attrSet = $this->eavModel ? $this->eavModel->attributeSet : $this->entity->defaultAttributeSet;
+            $attrSet = $this->entity->default_attribute_set_id ? $this->entity->defaultAttributeSet : $this->entity->attributeSet->first();
             foreach ($attrSet->attribute_group as $attrGroup) {
                 $form->tab($attrGroup->attribute_group_name, function ($form) use ($attrGroup) {
                     foreach ($attrGroup->attributes as $attr) {
+                        $slug = $this->entity->entity_code.'_edit_'.$attr->attribute_code.'_'.$attr->id;
+                        if (!empty($this->attrPermissions->firstWhere('slug',$slug))) {
+                            if (!Admin::user()->can($slug)) continue;
+                        }
                         if ($attr->frontend_type == 'hasone') {
-                            list($entity_code,$attrOptionsName) = explode('-',$attr->attribute_code.'-');
+                            list($entityCode,$attrOptionsName) = explode('-',$attr->attribute_code.'-');
                             $attrOptionsName = $attrOptionsName ? : 'name';
-                            if (!$enitiy = Entity::where('entity_code', '=', $entity_code)->first()) continue;
+                            if (!$enitiy = Entity::where('entity_code', '=', $entityCode)->first()) continue;
                             $attField = $form->select($attr->attribute_code,$attr->frontend_label)->options(
                                 function ($id) use ($enitiy,$attrOptionsName) {
                                     $entityClass = $enitiy->entity_class;
@@ -229,8 +241,8 @@ class LadminController extends Controller
                         if ($attr->is_unique) $attField = $attField->rules(['required',
                             Rule::unique($attr->getBackendTable(),'value')
                                 ->where(function ($query) use ($attr,$form)
-                                    {$query->where('attribute_id',$attr->id)->where('entity_id','<>',$form->model()->id);}
-                            )]);
+                                {$query->where('attribute_id',$attr->id)->where('entity_id','<>',$form->model()->id);}
+                                )]);
                         if ($attr->default_value) $attField = $attField->default($attr->default_value);
                         if ($attr->required_validate_class) $attField = $attField->addElementClass($attr->required_validate_class);
                         if ($attr->placeholder) $attField = $attField->placeholder($attr->placeholder);
@@ -245,5 +257,4 @@ class LadminController extends Controller
             }
         });
     }
-
 }

@@ -17,15 +17,19 @@ Route::group([
     $router->resource('/entity', 'EntityController');
     $router->get('/entity/ajax/attrs', 'EntityController@getDisplayAttrsAjax');
     $router->get('/entity/ajax/options', 'EntityController@getOptionsAjax');
-    $router->any('/attr/set', 'EntityController@attrSetStore');
-    $router->get('/attr/set/{id}', 'EntityController@attrSetDelete');
+    $router->any('/entity/{entity}/attr/set', 'EntityController@attrSetStore');
+    $router->get('/entity/{entity}/attr/set/{id}', 'EntityController@attrSetDelete');
+    $router->any('/entity/{entity}/attr', 'EntityController@attrStore');
+    $router->get('/entity/{entity}/attr/{id}', 'EntityController@attrDelete');
+    $router->get('/entity/{entity}/attr/{attrid}/permission/{attrcode}/name/{label}', 'EntityController@attrPermission');
+    $router->post('/entity/{entity}/attr/setmap', 'EntityController@attrMap');
     $router->resource('/attribute', 'AttributeController');
     $router->resource('/attributeset', 'AttributeSetController');
 //    $router->any('/attr/set', 'AttributeSetController@attrSetStore');
 //    $router->get('/attr/set/{id}', 'AttributeSetController@attrSetDelete');
-    $router->any('/attr/group', 'AttributeSetController@attrGroupStore');
-    $router->get('/attr/group/{id}', 'AttributeSetController@attrGroupDelete');
-    $router->post('/attr/setmap', 'AttributeSetController@attrMap');
+//    $router->post('/attr/setmap', 'AttributeSetController@attrMap');
+//    $router->any('/attr/group', 'AttributeSetController@attrGroupStore');
+//    $router->get('/attr/group/{id}', 'AttributeSetController@attrGroupDelete');
 
 });
 

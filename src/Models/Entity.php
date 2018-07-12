@@ -107,6 +107,9 @@ class Entity extends Model
     
     public function defaultAttributeSet()
     {
+        if ($this->default_attribute_set_id){
+            return $this->belongsTo(AttributeSet::class, 'default_attribute_set_id');
+        }
         return $this->hasOne(AttributeSet::class, 'entity_id');
     }
     
