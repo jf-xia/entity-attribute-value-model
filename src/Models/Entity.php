@@ -70,7 +70,7 @@ class Entity extends Model
 
     public function object_relation()
     {
-        return $this->hasManyThrough(static::class, EntityRelation::class,'entity_id','id','id','relation_entity_id');//
+        return $this->hasManyThrough(static::class, EntityRelation::class,'aaaaentity_id','bbbbbbid','ccccid','dddddrelation_entity_id');//
     }
 
     public function entity_relations()

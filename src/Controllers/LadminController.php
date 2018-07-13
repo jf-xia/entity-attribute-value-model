@@ -59,30 +59,46 @@ class LadminController extends Controller
         return $content;
     }
 
-    /**
-     * get Columns/Tools/Actions/Export & CURD/RowSelector/Buttons with permission
+    /** todo permission for ext actions & tools
+     * get Columns/Tools/Actions/Export & CURD/RowSelector/Buttons with permission slug_format[entityCode_{action}_attrCode_attrId]
      *
      * @return Grid
      */
     public function grid()
     {
+        \DB::enableQueryLog();
         return Admin::grid($this->entity->entity_class, function (Grid $grid) {
             $grid->id('ID')->sortable();
             $this->getColumn($grid,$this->entity->attributes);
-            //todo permission slug format redesign
             $this->getActions($grid);
             $this->getTools($grid);
             $this->getFilter($grid);
             if(!Admin::user()->can('export_'.$this->entity->entity_code)) $grid->disableExport();
+            ddd(\DB::getQueryLog());
         });
     }
 
     public function getColumn($grid,$attrs)
     {
+        $grid->column('hasmany2oa2title:title.title','ddddd');
         foreach ($attrs as $attr) {
             if (!$attr->not_list && $attr->backend_type<>'text'){
                 if (!$this->canViewAttr($attr)) continue;
-                $eavGrid = $grid->column($attr->attribute_code,$attr->frontend_label);
+                // hasone format: {hasone/hasmany}2{entityCode}2{relationEntityAttrCode}2{anyCode}
+                if ($attr->frontend_type == 'hasone' || $attr->frontend_type == 'hasmany') {
+                    $attrCode = $attr->frontend_type.'2'.$attr->attribute_code.'.'.explode('2',$attr->attribute_code.'2name')[1];
+                } else {
+                    $attrCode = $attr->attribute_code;
+                }
+                $eavGrid = $grid->column($attrCode,$attr->frontend_label);
+//                    list($enitiy,$attrOptionsName) = $this->getHasone($attr);
+//                    if (!$enitiy) continue;
+//                    $eavGrid = $eavGrid->display(function($id) use ($enitiy,$attrOptionsName){
+//                        $entityClass = $enitiy->entity_class;
+//                        $model = $entityClass::find($id);
+//                        return $model ? $model->$attrOptionsName : '';
+//                    });
+//                } else
                 if ($attr->list_field_html) {
                     //<a target="_blank" href="https://xxx.com/%value%.html" alt="SKU" >%value%</a>
                     $eavGrid = $eavGrid->display(function($val) use ($attr){
@@ -133,6 +149,11 @@ class LadminController extends Controller
                     $ft = $attr->frontend_type;
                     if ($ft == 'select' || $ft == 'radio'){
                         $filter->equal($attr->attribute_code,$attr->frontend_label)->{$ft}($attr->options());
+                    } elseif($ft == 'hasone'){
+                        list($enitiy,$attrOptionsName) = $this->getHasone($attr);
+                        if (!$enitiy) continue;
+                        $filter->equal($attr->attribute_code,$attr->frontend_label)->select()
+                            ->ajax('/admin/entity/ajax/options?entity='.base64_encode($enitiy->entity_class).'&option='.$attrOptionsName);
                     } elseif($ft == 'multipleSelect'|| $ft == 'checkbox'){
                         $filter->in($attr->attribute_code,$attr->frontend_label)->{$ft}($attr->options());
                     } elseif ($ft == 'datetime' || $ft == 'date' || $ft == 'time' || $ft == 'day' || $ft == 'month' || $ft == 'year'){
@@ -147,6 +168,14 @@ class LadminController extends Controller
         });
     }
 
+    public function getHasone($attr)
+    {
+        list($entityCode,$attrOptionsName) = explode('2',$attr->attribute_code.'2');
+        $attrOptionsName = $attrOptionsName ? : 'name';
+        $enitiy = Entity::where('entity_code', '=', $entityCode)->first();
+        return [$enitiy,$attrOptionsName];
+    }
+
     public function show($id)
     {
         return redirect(route($this->entityCode.'.edit',$id));
@@ -156,6 +185,7 @@ class LadminController extends Controller
     {
         $modelClass = $this->entity->entity_class;
         $this->eavModel = $modelClass::find($id);
+//        dd($this->eavModel->hasmany2oa2title()->toArray());
         $content = Admin::content();
         $content->header($this->entity->entity_name.trans('eav::eav.edit'));
         $content->description($this->entity->entity_desc);
@@ -213,6 +243,7 @@ class LadminController extends Controller
     {
         return Admin::form($this->entity->entity_class, function (Form $form) {
             $form->id('id','ID');
+            $form->display('hasmany2oa2title.title','ddddd');
             $attrSet = $this->entity->default_attribute_set_id ? $this->entity->defaultAttributeSet : $this->entity->attributeSet->first();
             foreach ($attrSet->attribute_group as $attrGroup) {
                 $form->tab($attrGroup->attribute_group_name, function ($form) use ($attrGroup) {
@@ -222,9 +253,8 @@ class LadminController extends Controller
                             if (!Admin::user()->can($slug)) continue;
                         }
                         if ($attr->frontend_type == 'hasone') {
-                            list($entityCode,$attrOptionsName) = explode('-',$attr->attribute_code.'-');
-                            $attrOptionsName = $attrOptionsName ? : 'name';
-                            if (!$enitiy = Entity::where('entity_code', '=', $entityCode)->first()) continue;
+                            list($enitiy,$attrOptionsName) = $this->getHasone($attr);
+                            if (!$enitiy) continue;
                             $attField = $form->select($attr->attribute_code,$attr->frontend_label)->options(
                                 function ($id) use ($enitiy,$attrOptionsName) {
                                     $entityClass = $enitiy->entity_class;

@@ -332,8 +332,34 @@ abstract class Model extends Eloquent
     public function getRelation2Entity()
     {
         if (!$this->relation2Entity) {
-            $this->relation2Entity = $this->baseEntity()->relation2Entity;
+            $this->relation2Entity = Entity::all();
         }
         return $this->relation2Entity;
+    }
+
+    //todo 关联管理模块 m2m表管理
+    public function __call($method, $parameters)
+    {
+        $attrCode = explode('2',$method.'2');
+        $relation = $this->getRelation2Entity()->where('entity_code', '=', $attrCode[1])->first();
+        if (!empty($relation)) {
+            $modelName = $relation->entity_class;
+            if ($attrCode[0] == 'hasone'){
+                return $this->belongsTo($modelName,substr($method,7));
+            } elseif ($attrCode[0] == 'hasmany'){
+                return $this->belongsToMany($relation->entity_class,'entity_relations', 'entity_object_id', 'entity_relation_object_id')
+                    ->where('entity_relations.relation_entity_id',$relation->id)
+                    ->where('entity_relations.entity_id',$this->baseEntity()->id)
+//                    ->get(['title'])
+                    ;
+//                return $this->hasManyThrough($relation->entity_class,EntityRelation::class, 'entity_object_id', 'id','id','entity_relation_object_id')->where('entity_relations.relation_entity_id',$relation->id)->where('entity_relations.entity_id',$this->baseEntity()->id)->get(['title']);
+            }
+        }
+//        parent::__call($method, $parameters);
+        if (in_array($method, ['increment', 'decrement'])) {
+            return $this->$method(...$parameters);
+        }
+
+        return $this->newQuery()->$method(...$parameters);
     }
 }
