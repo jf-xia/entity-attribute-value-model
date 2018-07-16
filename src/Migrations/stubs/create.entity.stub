@@ -102,7 +102,7 @@ class DummyClass extends Migration
 			$table->index('attribute_id');
 			$table->index('entity_id');        	  
         });
-        /** todo 4 improve CURD data base migration
+        /**
         $entity = Entity::create([
         	'entity_code' => 'DummyTable',
         	'entity_class' => 'DummyBaseClass',

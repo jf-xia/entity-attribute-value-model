@@ -12,10 +12,10 @@ class AttributeSet extends Model
         'attribute_set_name' , 'entity_id'
     ];
 
-//    public function attributes()
-//    {
-//        return $this->hasManyThrough(Attribute::class, EntityAttribute::class, 'attribute_set_id', 'attribute_id');
-//    }
+    public function attributes()
+    {
+        return $this->hasManyThrough(Attribute::class, EntityAttribute::class, 'attribute_set_id', 'id');
+    }
 
     public function entity()
     {

@@ -312,11 +312,6 @@ abstract class Model extends Eloquent
         return true;
     }
 
-//    public function attributeSet()
-//    {
-//        return $this->belongsTo(AttributeSet::class, 'attribute_set_id','id');
-//    }
-
     public function updateAttributes($query, $options, $modelData, $loadedAttributes)
     {
         $loadedAttributes->each(function ($attribute, $key) use ($modelData) {
@@ -337,7 +332,13 @@ abstract class Model extends Eloquent
         return $this->relation2Entity;
     }
 
-    //todo 关联管理模块 m2m表管理
+    /**
+     * 关联管理模块 get one2one relation method
+     * @param string $method
+     * @param array $parameters
+     * @return $this|\Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @throws \Exception
+     */
     public function __call($method, $parameters)
     {
         $attrCode = explode('2',$method.'2');
@@ -347,6 +348,13 @@ abstract class Model extends Eloquent
             if ($attrCode[0] == 'hasone'){
                 return $this->belongsTo($modelName,substr($method,7));
             } elseif ($attrCode[0] == 'hasmany'){
+                //todo 4 hasmany
+//        \DB::enableQueryLog();
+//        ddd(\DB::getQueryLog());
+//        dd($this->eavModel->hasmany2oa2title()->toArray());
+//                $form->display('hasmany2oa2title.title','ddddd');
+//                $grid->column('hasmany2oa2title.title','ddddd');//->pluck('title')->label();
+//                $grid->hasmany2oa2title('ddddd')->pluck('title')->label();
                 return $this->belongsToMany($relation->entity_class,'entity_relations', 'entity_object_id', 'entity_relation_object_id')
                     ->where('entity_relations.relation_entity_id',$relation->id)
                     ->where('entity_relations.entity_id',$this->baseEntity()->id)
@@ -355,7 +363,7 @@ abstract class Model extends Eloquent
 //                return $this->hasManyThrough($relation->entity_class,EntityRelation::class, 'entity_object_id', 'id','id','entity_relation_object_id')->where('entity_relations.relation_entity_id',$relation->id)->where('entity_relations.entity_id',$this->baseEntity()->id)->get(['title']);
             }
         }
-//        parent::__call($method, $parameters);
+
         if (in_array($method, ['increment', 'decrement'])) {
             return $this->$method(...$parameters);
         }

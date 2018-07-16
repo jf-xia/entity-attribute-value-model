@@ -28,10 +28,14 @@ class EntityController extends Controller
 {
     private $entity;
 
+    private $entityId;
+
     public function __construct()
     {
-        //todo debug on entity
-        $this->entity = (object)['id' => Route::getCurrentRoute()->parameter('entity'),'attributeSet'=>collect()];
+        $this->entityId = Route::getCurrentRoute()->parameter('entity');
+        if ($this->entityId){
+            $this->entity = Entity::find($this->entityId);
+        }
     }
 
     /** todo 2 Report & chartjs setting & default by option group Pie, count Bar & Scatter, value Line, skills Radar & Polar area
@@ -114,16 +118,25 @@ class EntityController extends Controller
         return Admin::form(Entity::class, function (Form $form) {
 //            $form->display('id', 'ID');
             $form->setTitle(trans('eav::eav.entity').trans('eav::eav.edit'));
-            $form->text('entity_name',trans('eav::eav.entity_name'));
-            $form->text('entity_code',trans('eav::eav.entity_code'));//todo 3 mask a-z_-
-            $form->text('entity_class',trans('eav::eav.entity_class'));//->rules('required|unique:entities'); todo 3 set default base code
-            $form->text('entity_table',trans('eav::eav.entity_table'));//->rules('required|unique:entities');
-            $form->select('default_attribute_set_id',trans('eav::eav.default_attribute_set_id'))
-                ->options($this->entity->attributeSet->pluck('attribute_set_name','id'));
-            $form->multipleSelect('relation_entity_ids',trans('eav::eav.entity_relations'))->options(Entity::all()->pluck('entity_name','id'));
+            $form->text('entity_name',trans('eav::eav.entity_name'))->attribute('required');
+//            $form->text('entity_table',trans('eav::eav.entity_table'));//->rules('required|unique:entities');
+            if ($this->entityId) {
+                $form->display('entity_code_class',trans('eav::eav.entity_code'))->with(function(){
+                    return $this->entity_code.' ('.$this->entity_class.')';
+                });
+                $form->select('default_attribute_set_id',trans('eav::eav.default_attribute_set_id'))
+                        ->options($this->entity->attributeSets->pluck('attribute_set_name','id'));
+                $form->builder()->addHiddenField((new Form\Field\Hidden('_previous_'))->value(route('entity.edit',$this->entity->id)));
+            } else {
+                $form->text('entity_code',trans('eav::eav.entity_code'))->attribute('required')
+                    ->attribute('pattern','^([a-z_])+')->placeholder(trans('eav::eav.entity_code').'必须输入小写字母"a-z"与下划线"_"');//mask a-z_-
+                $form->text('entity_class',trans('eav::eav.entity_class'))->attribute('required');//->rules('required|unique:entities');
+            }
+            $form->multipleSelect('relation_entity_ids',trans('eav::eav.entity_relations'))->options(Entity::all()->pluck('entity_name','id'))
+                    ->help('新建实体时将自动创建角色、权限和菜单：Leader(增删改查)/Base(改查)/Relation(查)，可在系统管理中修改');
 //            $form->column('additional_attribute_table',trans('eav::eav.additional_attribute_table'));
 //            $form->select('is_flat_enabled',trans('eav::eav.is_flat_enabled'))->options(status()); //todo 3 flat table
-//            $form->subForm('attributes_form',trans('eav::eav.attributes'), function (Form\NestedForm $form) {
+//            $form->subForm('attributes',trans('eav::eav.attributes'), function (Form\NestedForm $form) {
 //                (new \Eav\Controllers\AttributeController)->formFileds($form);
 //            });
 //            $form->subForm('entity_relations',trans('eav::eav.entity_relations'), function (Form\NestedForm $form) {
@@ -138,8 +151,7 @@ class EntityController extends Controller
 //                    });
 //            });
             $form->setWidth(8,3);
-            $form->builder()->addHiddenField((new Form\Field\Hidden('_previous_'))->value(route('entity.edit',$this->entity->id)));
-            $this->formOnSave($form);
+//            $this->formOnSave($form);
         });
     }
 
@@ -174,7 +186,7 @@ class EntityController extends Controller
      */
     public function runSetAdminData($form)
     {
-        //todo custom setting
+        //todo 2 custom setting
         $model = $form->model();
         $roleLeader = Role::create(['name' => $model->entity_name.'Leader', 'slug' => $model->entity_code.'_leader']);
         $roleBase = Role::create(['name' => $model->entity_name.'Base', 'slug' => $model->entity_code.'_base']);
@@ -231,6 +243,9 @@ class EntityController extends Controller
     public function edit($id)
     {
         $this->entity = Entity::find($id);
+        if (empty($this->entity)) {
+            abort(404);
+        }
         $content = Admin::content();
         $content->header($this->entity->entity_name.' & '.trans('eav::eav.attributes').trans('eav::eav.edit'));
         $content->description('...');
@@ -251,7 +266,7 @@ class EntityController extends Controller
         });
         $content->row(function (Row $row) {
             $row->column(8, function (Column $column) {
-                $attrSet = $this->entity->attributeSet->find(Input::get('set'));
+                $attrSet = $this->entity->attributeSets->find(Input::get('set'));
                 $attribute_set_name = $attrSet ? $attrSet->attribute_set_name : '';
                 $column->append((new Box($attribute_set_name.trans('eav::eav.attributes').trans('eav::eav.edit'),$this->attrGrid())));
             });
@@ -398,8 +413,7 @@ class EntityController extends Controller
 
     public function attrSetGrid()
     {
-        //todo 3 table extend
-        //todo set table height
+        //todo 4 table extend
         $grid = new \Encore\Admin\Widgets\Table();
         $rows = AttributeSet::with('entity')->where('entity_id',$this->entity->id)->get()->toArray();
         if ($rows){
@@ -479,7 +493,7 @@ class EntityController extends Controller
         $form->text('required_validate_class',trans('eav::eav.required_validate_class'));
         $form->text('order',trans('eav::eav.order'));
         $form->text('list_field_html',trans('eav::eav.list_field_html'));
-        //todo 3 form_field_html form
+        //todo 4 form_field_html form
         $form->text('help',trans('eav::eav.help'));
         $form->text('placeholder',trans('eav::eav.placeholder'));
     }

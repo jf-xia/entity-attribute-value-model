@@ -66,21 +66,19 @@ class LadminController extends Controller
      */
     public function grid()
     {
-        \DB::enableQueryLog();
         return Admin::grid($this->entity->entity_class, function (Grid $grid) {
             $grid->id('ID')->sortable();
-            $this->getColumn($grid,$this->entity->attributes);
+            $this->getColumn($grid);
             $this->getActions($grid);
             $this->getTools($grid);
             $this->getFilter($grid);
             if(!Admin::user()->can('export_'.$this->entity->entity_code)) $grid->disableExport();
-            ddd(\DB::getQueryLog());
         });
     }
 
-    public function getColumn($grid,$attrs)
+    public function getColumn($grid)
     {
-        $grid->column('hasmany2oa2title:title.title','ddddd');
+        $attrs = $this->entity->attributeSet->attributes;
         foreach ($attrs as $attr) {
             if (!$attr->not_list && $attr->backend_type<>'text'){
                 if (!$this->canViewAttr($attr)) continue;
@@ -185,7 +183,6 @@ class LadminController extends Controller
     {
         $modelClass = $this->entity->entity_class;
         $this->eavModel = $modelClass::find($id);
-//        dd($this->eavModel->hasmany2oa2title()->toArray());
         $content = Admin::content();
         $content->header($this->entity->entity_name.trans('eav::eav.edit'));
         $content->description($this->entity->entity_desc);
@@ -195,12 +192,28 @@ class LadminController extends Controller
 
     public function create()
     {
-        //todo 2 set attribute_set_id
         $content = Admin::content();
         $content->header($this->entity->entity_name.trans('eav::eav.create'));
         $content->description($this->entity->entity_desc);
+        // handle set attribute_set_id
+        if ($attrSetId = Input::get('set')) {
+            $attrSets = $this->getAttrSet();
+            $attrSetOptionHtml = '';
+            foreach ($attrSets as $attrSet) {
+                $selected = $attrSetId== $attrSet->id? ' selected = "selected"' : '';
+                $attrSetOptionHtml .= '<option value="'.$attrSet->id.'" '.$selected.' >'.$attrSet->attribute_set_name.'</option>';
+            }
+            $attrSetHtml = '<select onchange="window.location.href=\'?set=\'+$(this).children(\'option:selected\').val();"
+                        class="form-control set">'.$attrSetOptionHtml.'</select>';
+            $content->row($attrSetHtml);
+        }
         $content->body($this->form());
         return $content;
+    }
+
+    public function getAttrSet()
+    {
+        return AttributeSet::where('entity_id',$this->entity->id)->get();
     }
 
     /**
@@ -211,7 +224,7 @@ class LadminController extends Controller
     protected function formLists()
     {
         $tab = new Tab();
-        //todo 2 edit map to relation entity by entity_relation_ids 关联管理模块 m2m表管理
+        //todo 3 edit map to relation entity by entity_relation_ids 关联管理模块 m2m表管理
         foreach ($this->entity->entity_relations->groupBy('relation_entity_id') as $entity_relation) {
             $entity = $entity_relation->first()->relation;
             $entityObject = $entity->entity_class;
@@ -243,9 +256,13 @@ class LadminController extends Controller
     {
         return Admin::form($this->entity->entity_class, function (Form $form) {
             $form->id('id','ID');
-            $form->display('hasmany2oa2title.title','ddddd');
-            $attrSet = $this->entity->default_attribute_set_id ? $this->entity->defaultAttributeSet : $this->entity->attributeSet->first();
-            foreach ($attrSet->attribute_group as $attrGroup) {
+            if (Admin::user()->can('update_'.$this->entity->entity_code) && explode('.',Route::currentRouteName())[1] == 'edit') {
+                $form->select('attribute_set_id',trans('eav::eav.attribute_set_id'))->options($this->getAttrSet()->pluck('attribute_set_name','id'));
+            } elseif (Input::get('set')) {
+                $form->hidden('attribute_set_id')->value(Input::get('set'));
+            }
+
+            foreach ($this->entity->attributeSet->attribute_group as $attrGroup) {
                 $form->tab($attrGroup->attribute_group_name, function ($form) use ($attrGroup) {
                     foreach ($attrGroup->attributes as $attr) {
                         $slug = $this->entity->entity_code.'_edit_'.$attr->attribute_code.'_'.$attr->id;

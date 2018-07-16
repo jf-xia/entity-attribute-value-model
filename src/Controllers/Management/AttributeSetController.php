@@ -20,12 +20,12 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\URL;
 
+// reconstruction AttributeSetController to AttributeController
 class AttributeSetController extends Controller
 {
     use ModelForm;
     public function index()
     {
-        //todo 3 reconstruction AttributeSetController to AttributeController
         $content = Admin::content();
         $content->header(trans('eav::eav.attributes').trans('eav::eav.list'));
         $content->description('...');
@@ -148,7 +148,7 @@ class AttributeSetController extends Controller
 
     public function attrSetGrid()
     {
-        //todo 3 table extend
+        //todo 4 table extend
         $grid = new \Encore\Admin\Widgets\Table();
         $rows = AttributeSet::with('entity')->get()->toArray();
         if ($rows){

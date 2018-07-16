@@ -73,6 +73,7 @@ class EntityMigrationCreator
      */
     protected function getStub()
     {
+        //todo 4 improve CURD data base migration
         return $this->files->get($this->getStubPath()."/create.entity.stub");
     }
     
