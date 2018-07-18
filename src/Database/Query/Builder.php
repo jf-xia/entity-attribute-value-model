@@ -148,7 +148,7 @@ class Builder extends QueryBuilder
         $columns = $this->columns;
         if ($columns == ['*'] || $columns == '*' || in_array("{$this->from}.*",$columns)) {
             $loadedAttributes = $this->loadAttributes();
-            $columns = ["{$this->from}.*"];
+            $columns = in_array("{$this->from}.*",$columns) ? $this->columns : ["{$this->from}.*"];
             $loadedAttributes->each(function ($attribute, $key) use (&$columns) {
                 if (!$attribute->isStatic()) {
                     $columns[] = $attribute->setEntity($this->baseEntity())
@@ -224,7 +224,7 @@ class Builder extends QueryBuilder
             
             return parent::toSql();
         }
-        
+
         $this->processAttributes($this->fixColumns());
 
         return $this->grammar->compileSelect($this);

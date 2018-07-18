@@ -249,7 +249,7 @@ class LadminController extends Controller
     protected function form()
     {
         return Admin::form($this->entity->entity_class, function (Form $form) {
-            $form->multipleSelect('hasmany2oa2title','ddddd')->options(function($id){return $id;});
+//            $form->multipleSelect('hasmany2oa2title','ddddd')->options(Oa::all()->pluck('title','id')); todo hasmany
             $form->id('id','ID');
             if (Admin::user()->can('update_'.$this->entity->entity_code) && explode('.',Route::currentRouteName())[1] == 'edit') {
                 $form->select('attribute_set_id',trans('eav::eav.attribute_set_id'))->options($this->getAttrSet()->pluck('attribute_set_name','id'));
