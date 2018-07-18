@@ -146,7 +146,7 @@ class Builder extends QueryBuilder
 
         $loadedAttributes = null;
         $columns = $this->columns;
-        if ($columns == ['*'] || $columns == '*') {
+        if ($columns == ['*'] || $columns == '*' || in_array("{$this->from}.*",$columns)) {
             $loadedAttributes = $this->loadAttributes();
             $columns = ["{$this->from}.*"];
             $loadedAttributes->each(function ($attribute, $key) use (&$columns) {

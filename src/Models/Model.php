@@ -332,6 +332,19 @@ abstract class Model extends Eloquent
         return $this->relation2Entity;
     }
 
+//    public function hasmany2oa2title()
+//    {
+////        dd(__FUNCTION__);
+//        $attrCode = explode('2',__FUNCTION__.'2');
+//        $relation = $this->getRelation2Entity()->where('entity_code', '=', $attrCode[1])->first();
+//        return tap($this->belongsToMany($relation->entity_class,'entity_relations', 'entity_object_id', 'entity_relation_object_id'),
+//            function ($hasMany) use ($relation) {
+////                dd($hasMany->getBaseQuery(),$hasMany->getQuery());
+//                return $hasMany->getQuery()->where('entity_relations.relation_entity_id',$relation->id)
+//                    ->where('entity_relations.entity_id',$this->baseEntity()->id);//->get(['title']);
+//            });
+//    }
+
     /**
      * 关联管理模块 get one2one relation method
      * @param string $method
@@ -348,18 +361,18 @@ abstract class Model extends Eloquent
             if ($attrCode[0] == 'hasone'){
                 return $this->belongsTo($modelName,substr($method,7));
             } elseif ($attrCode[0] == 'hasmany'){
-                //todo 4 hasmany
+                //todo 1 hasmany
 //        \DB::enableQueryLog();
 //        ddd(\DB::getQueryLog());
 //        dd($this->eavModel->hasmany2oa2title()->toArray());
 //                $form->display('hasmany2oa2title.title','ddddd');
 //                $grid->column('hasmany2oa2title.title','ddddd');//->pluck('title')->label();
 //                $grid->hasmany2oa2title('ddddd')->pluck('title')->label();
-                return $this->belongsToMany($relation->entity_class,'entity_relations', 'entity_object_id', 'entity_relation_object_id')
-                    ->where('entity_relations.relation_entity_id',$relation->id)
-                    ->where('entity_relations.entity_id',$this->baseEntity()->id)
-//                    ->get(['title'])
-                    ;
+                return tap($this->hasManyThrough($relation->entity_class,EntityRelation::class, 'entity_object_id', 'id','id','entity_relation_object_id'),
+                            function ($hasMany) use ($relation) {
+                                $hasMany->where('entity_relations.relation_entity_id',$relation->id)
+                                    ->where('entity_relations.entity_id',$this->baseEntity()->id);
+                            });
 //                return $this->hasManyThrough($relation->entity_class,EntityRelation::class, 'entity_object_id', 'id','id','entity_relation_object_id')->where('entity_relations.relation_entity_id',$relation->id)->where('entity_relations.entity_id',$this->baseEntity()->id)->get(['title']);
             }
         }

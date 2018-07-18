@@ -3,6 +3,7 @@
 namespace Eav\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Oa;
 use App\Products;
 use Eav\Admin\Widgets\RelationGrid;
 use Eav\Attribute;
@@ -48,6 +49,7 @@ class LadminController extends Controller
         if(empty($this->entity)){
             abort(404);
         }
+//        dd($this->entity->attributeSets);
     }
 
     public function index()
@@ -59,7 +61,7 @@ class LadminController extends Controller
         return $content;
     }
 
-    /** todo permission for ext actions & tools
+    /** todo 3 permission for ext actions & tools
      * get Columns/Tools/Actions/Export & CURD/RowSelector/Buttons with permission slug_format[entityCode_{action}_attrCode_attrId]
      *
      * @return Grid
@@ -76,9 +78,9 @@ class LadminController extends Controller
         });
     }
 
-    public function getColumn($grid)
+    public function getColumn($grid,$attrs = null)
     {
-        $attrs = $this->entity->attributeSet->attributes;
+        $attrs = $attrs ? : $this->entity->attributeSet->attributes;
         foreach ($attrs as $attr) {
             if (!$attr->not_list && $attr->backend_type<>'text'){
                 if (!$this->canViewAttr($attr)) continue;
@@ -89,14 +91,6 @@ class LadminController extends Controller
                     $attrCode = $attr->attribute_code;
                 }
                 $eavGrid = $grid->column($attrCode,$attr->frontend_label);
-//                    list($enitiy,$attrOptionsName) = $this->getHasone($attr);
-//                    if (!$enitiy) continue;
-//                    $eavGrid = $eavGrid->display(function($id) use ($enitiy,$attrOptionsName){
-//                        $entityClass = $enitiy->entity_class;
-//                        $model = $entityClass::find($id);
-//                        return $model ? $model->$attrOptionsName : '';
-//                    });
-//                } else
                 if ($attr->list_field_html) {
                     //<a target="_blank" href="https://xxx.com/%value%.html" alt="SKU" >%value%</a>
                     $eavGrid = $eavGrid->display(function($val) use ($attr){
@@ -255,6 +249,7 @@ class LadminController extends Controller
     protected function form()
     {
         return Admin::form($this->entity->entity_class, function (Form $form) {
+            $form->multipleSelect('hasmany2oa2title','ddddd')->options(function($id){return $id;});
             $form->id('id','ID');
             if (Admin::user()->can('update_'.$this->entity->entity_code) && explode('.',Route::currentRouteName())[1] == 'edit') {
                 $form->select('attribute_set_id',trans('eav::eav.attribute_set_id'))->options($this->getAttrSet()->pluck('attribute_set_name','id'));
