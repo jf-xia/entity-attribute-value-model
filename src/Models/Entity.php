@@ -105,6 +105,7 @@ class Entity extends Model
             ->whereIn('relation_entity_id',$this->getRelationEntityIdsAttribute())
             ->with(['entity','relation']);
     }
+
     public static function findByCode($code)
     {
         if (!isset(static::$entityIdCache[$code])) {

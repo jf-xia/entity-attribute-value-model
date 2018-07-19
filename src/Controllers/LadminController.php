@@ -3,24 +3,15 @@
 namespace Eav\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Oa;
-use App\Products;
 use Eav\Admin\Widgets\RelationGrid;
 use Eav\Attribute;
-use Eav\AttributeGroup;
 use Eav\AttributeSet;
 use Eav\Entity;
-use Eav\EntityAttribute;
-use Eav\EntityRelation;
 use Encore\Admin\Auth\Database\Permission;
-use Encore\Admin\Controllers\Dashboard;
 use Encore\Admin\Controllers\ModelForm;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
-use Encore\Admin\Layout\Column;
-use Encore\Admin\Layout\Content;
-use Encore\Admin\Layout\Row;
 use Encore\Admin\Widgets\Box;
 use Encore\Admin\Widgets\Tab;
 use Illuminate\Support\Facades\Input;
@@ -49,7 +40,6 @@ class LadminController extends Controller
         if(empty($this->entity)){
             abort(404);
         }
-//        dd($this->entity->attributeSets);
     }
 
     public function index()
@@ -70,6 +60,7 @@ class LadminController extends Controller
     {
         return Admin::grid($this->entity->entity_class, function (Grid $grid) {
             $grid->id('ID')->sortable();
+//            $grid->hasmany2oa2title('hasmany2oa2title')->pluck('title')->label();
             $this->getColumn($grid);
             $this->getActions($grid);
             $this->getTools($grid);
@@ -217,9 +208,13 @@ class LadminController extends Controller
      */
     protected function formLists()
     {
+        $entityRelations = $this->entity->entity_relations;
+        if (!$entityRelations->count()) {
+            return '';
+        }
         $tab = new Tab();
         //todo 3 edit map to relation entity by entity_relation_ids 关联管理模块 m2m表管理
-        foreach ($this->entity->entity_relations->groupBy('relation_entity_id') as $entity_relation) {
+        foreach ($entityRelations->groupBy('relation_entity_id') as $entity_relation) {
             $entity = $entity_relation->first()->relation;
             $entityObject = $entity->entity_class;
             $grid = new RelationGrid(new $entityObject(),function(RelationGrid $grid) use ($entity_relation,$entity){//
@@ -248,8 +243,9 @@ class LadminController extends Controller
      */
     protected function form()
     {
-        return Admin::form($this->entity->entity_class, function (Form $form) {
-//            $form->multipleSelect('hasmany2oa2title','ddddd')->options(Oa::all()->pluck('title','id')); todo hasmany
+        $modelEav = $this->entity->entity_class;
+        $form = new Form(new $modelEav, function (Form $form) {
+//            $form->multipleSelect('hasmany2oa2title','ddddd')->options(Oa::all()->pluck('title','id')); // hasmany
             $form->id('id','ID');
             if (Admin::user()->can('update_'.$this->entity->entity_code) && explode('.',Route::currentRouteName())[1] == 'edit') {
                 $form->select('attribute_set_id',trans('eav::eav.attribute_set_id'))->options($this->getAttrSet()->pluck('attribute_set_name','id'));
@@ -298,5 +294,6 @@ class LadminController extends Controller
                 $form->disableSubmit();
             }
         });
+        return $form;
     }
 }
