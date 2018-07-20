@@ -27,9 +27,9 @@ class Bpmn extends Field
      * @var array
      */
     protected static $js = [
-        '/bpmn/dist/bpmn-modeler.development.js?v=1',
-        '/bpmn/custom-viewer.bundled.js?v=1',
-//        '/bpmn/index.js?v=1',
+//        '/bpmn/dist/bpmn-modeler.development.js?v=1',
+//        '/bpmn/custom-viewer.bundled.js?v=1',
+        '/bpmn/index.js?v=1',
     ];
 
     /**
