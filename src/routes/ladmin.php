@@ -26,6 +26,8 @@ Route::group([
     $router->resource('/attribute', 'AttributeController');
     $router->resource('/attributeset', 'AttributeSetController');
     $router->resource('bpmn/workflow', 'WorkflowController');
+    $router->get('bpmn/workflow/ajax/get/{id}', 'WorkflowController@ajaxBpmnViewer');
+    $router->post('bpmn/workflow/ajax/update/{id}', 'WorkflowController@ajaxBpmnSave');
     $router->resource('bpmn/process', 'ProcessController');
     $router->resource('bpmn/processitem', 'ProcessItemController');
 //    $router->any('/attr/set', 'AttributeSetController@attrSetStore');
@@ -38,5 +40,5 @@ Route::group([
 
 //Form::forget(['map', 'editor']);
 Form::extend('subForm', Extensions\FormHasMany::class);
-Form::extend('bpmn', Extensions\Bpmn::class);
+//Form::extend('bpmn', Extensions\Bpmn::class);
 

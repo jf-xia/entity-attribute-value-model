@@ -2,6 +2,8 @@
 
 namespace Eav\Controllers;
 
+use Eav\Entity;
+use Eav\Models\Workflow\Workflow;
 use Encore\Admin\Controllers\ModelForm;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -37,6 +39,7 @@ class ProcessController extends Controller
      */
     public function edit($id)
     {
+
         return Admin::content(function (Content $content) use ($id) {
             $content->header(trans('eav::eav.Process'));
             $content->description(trans('admin.edit'));
@@ -88,13 +91,13 @@ class ProcessController extends Controller
     {
         return Admin::form(Process::class, function (Form $form) {
             $form->display('id', 'ID');
-            $form->text('workflow_id',trans('eav::eav.workflow_id'))->rules('required');
-            $form->text('entity_id',trans('eav::eav.entity_id'))->rules('required');
-            $form->text('user_id',trans('eav::eav.user_id'))->rules('required');
+            $form->select('workflow_id',trans('eav::eav.workflow_id'))->options(Workflow::all()->pluck('name','id'))->rules('required');
+            $form->select('entity_id',trans('eav::eav.entity_id'))->options(Entity::all()->pluck('entity_name','id'))->rules('required');
+            $form->hidden('user_id',trans('eav::eav.user_id'))->value(Admin::user()->id)->rules('required');
             $form->text('title',trans('eav::eav.title'))->rules('required');
-            $form->text('serialized_workflow',trans('eav::eav.serialized_workflow'))->rules('required');
-            $form->text('process_data',trans('eav::eav.process_data'))->rules('required');
-            $form->text('end_date',trans('eav::eav.end_date'))->rules('required');
+//            $form->text('serialized_workflow',trans('eav::eav.serialized_workflow'))->rules('required');
+//            $form->text('process_data',trans('eav::eav.process_data'))->rules('required');
+            $form->datetime('end_date',trans('eav::eav.end_date'))->rules('required');
             $form->display('created_at', trans('admin.created_at'));
             $form->display('updated_at', trans('admin.updated_at'));
 

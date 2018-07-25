@@ -94,8 +94,24 @@ class WorkflowController extends Controller
             $form->hidden('user_id', trans('task.user_id'))->value(Admin::user()->id);
             $form->display('created_at', trans('admin.created_at'));
             $form->display('updated_at', trans('admin.updated_at'));
-            $form->bpmn('bpmn',trans('eav::eav.bpmn'));//->rules('required');
+            $form->display('bpmn', trans('eav::eav.bpmn'))->with(function($bpmnXML){
+                $model = $this;
+                return view('eav::admin.form.bpmnViewer',compact('bpmnXML','model'));
+            });
+//            $form->bpmn('bpmn',trans('eav::eav.bpmn'));//->rules('required');
 
         });
+    }
+
+    public function ajaxBpmnViewer($id)
+    {
+        $workflow = Workflow::find($id);
+        return $workflow->toJson();
+    }
+
+    public function ajaxBpmnSave($id)
+    {
+        $workflow = Workflow::updateOrCreate(['id'=>$id],['bpmn'=>request()->get('bpmn')]);
+        return $workflow;
     }
 }
