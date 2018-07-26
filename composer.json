@@ -24,7 +24,8 @@
         "mews/captcha": "^2.2",
         "overtrue/laravel-wechat": "~4.0",
         "phpmentors/workflower": "1.3.*",
-        "spatie/eloquent-sortable": "^3.4"
+        "spatie/eloquent-sortable": "^3.4",
+        "yohang/finite": "^1.1"
     },
     "require-dev": {
         "phpunit/phpunit": "~6.0",
