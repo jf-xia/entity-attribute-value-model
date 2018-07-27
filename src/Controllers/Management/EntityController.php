@@ -305,8 +305,7 @@ class EntityController extends Controller
         $form = '';
         $grid = new \Encore\Admin\Widgets\Table();
         $attrs = Attribute::query()->where('entity_id',$this->entity->id)->get();
-        if ($attrs){
-            $drows = $this->attrData($attrs->toArray());
+        if ($attrs && $drows = $this->attrData($attrs->toArray())){
             $grid->setHeaders(array_map(function($th){return trans('eav::eav.'.$th);},array_keys($drows[0])));
             $grid->setRows($drows);
         }

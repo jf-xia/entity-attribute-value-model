@@ -206,7 +206,7 @@ class Entity extends Model
     public function createdAttrSetGroup4Entity($model)
     {
         $attributeSet = AttributeSet::create(['entity_id'=>$model->id,'attribute_set_name'=>'基本']);
-        $model->attribute_set_id = $attributeSet->id;
+        $model->default_attribute_set_id = $attributeSet->id;
         $model->save();
         $attributeGroup = AttributeGroup::create(
             ['attribute_set_id'=>$attributeSet->id,'attribute_group_name'=>'基本','order'=>0]);
