@@ -156,38 +156,46 @@ class Builder extends QueryBuilder
                 }
             });
         } else {
-            $filterAttr = (array) $this->attributeColumns['columns'];
-
-            if ($columns == ['*']) {
-                $columns = ["{$this->from}.*"];
-            } else {
-                $orgColumns = collect((array) $columns)->mapToGroups(function ($item, $key) {
-                    if (is_a($item, Expression::class)) {
-                        return ['expression' => $item];
-                    } else {
-                        return ['columns' => $item];
-                    }
-                });
-
-                $columns = ($orgColumns->get('columns')->contains('*'))?["{$this->from}.*"]:[];
-                $filterAttr = $orgColumns->get('columns')->merge($filterAttr)->all();
-                $loadedAttributes = $this->loadAttributes($filterAttr)
-                    ->each(function ($attribute, $key) use (&$columns, $orgColumns) {
-                        if ($orgColumns->get('columns')->contains($attribute->getAttributeCode())) {
-                            $columns[] = $attribute->setEntity($this->baseEntity())
-                                    ->addAttributeJoin($this, 'left')->getSelectColumn();
-                        } else {
-                            $attribute->setEntity($this->baseEntity())
-                                    ->addAttributeJoin($this);
-                        }
-                    });
-
-                if ($expression = $orgColumns->get('expression')) {
-                    $columns = $expression->merge($columns)->all();
+            $loadedAttributes = $this->loadAttributes();
+//            dd($loadedAttributes,$columns);//todo fix bug on ['',as]
+            $loadedAttributes->each(function ($attribute, $key) use (&$columns) {
+                if (!$attribute->isStatic()) {
+                    $columns[] = $attribute->setEntity($this->baseEntity())
+                        ->addAttributeJoin($this, 'left')->getSelectColumn();
                 }
-            }
+            });
+//            $filterAttr = (array) $this->attributeColumns['columns'];
+//
+//            if ($columns == ['*']) {
+//                $columns = ["{$this->from}.*"];
+//            } else {
+//                $orgColumns = collect((array) $columns)->mapToGroups(function ($item, $key) {
+//                    if (is_a($item, Expression::class)) {
+//                        return ['expression' => $item];
+//                    } else {
+//                        return ['columns' => $item];
+//                    }
+//                });
+//
+//                $columns = ($orgColumns->get('columns')->contains('*'))?["{$this->from}.*"]:[];
+//                $filterAttr = $orgColumns->get('columns')->merge($filterAttr)->all();
+//                $loadedAttributes = $this->loadAttributes($filterAttr)
+//                    ->each(function ($attribute, $key) use (&$columns, $orgColumns) {
+//                        if ($orgColumns->get('columns')->contains($attribute->getAttributeCode())) {
+//                            $columns[] = $attribute->setEntity($this->baseEntity())
+//                                    ->addAttributeJoin($this, 'left')->getSelectColumn();
+//                        } else {
+//                            $attribute->setEntity($this->baseEntity())
+//                                    ->addAttributeJoin($this);
+//                        }
+//                    });
+//
+//                if ($expression = $orgColumns->get('expression')) {
+//                    $columns = $expression->merge($columns)->all();
+//                }
+//            }
         }
-        
+
         $this->columns = $columns;
 
         return $loadedAttributes;

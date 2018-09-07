@@ -93,7 +93,8 @@ class EntityController extends Controller
         $q = request()->get('q');
         $entityClass = base64_decode(request()->get('entity'));
         $optionsName = request()->get('option');
-        return $entityClass::where($optionsName, 'like', "%$q%")->paginate(null, ['id', $optionsName.' as text']);
+        $filter = $optionsName=='text' ? ['*'] : ['id', $optionsName.' as text'];//todo fix bug on ['',as]
+        return $entityClass::where($optionsName, 'like', "%$q%")->paginate(null, $filter);//
     }
 
     /**

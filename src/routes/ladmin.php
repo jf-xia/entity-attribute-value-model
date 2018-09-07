@@ -11,8 +11,12 @@ Route::group([
     'namespace'     => config('eav.route.namespace'),
     'middleware'    => config('eav.route.middleware'),
 ], function (Router $router) {
+//    $router->get('/', function () { return redirect('admin/auth/users'); });
+
     foreach (\Eav\Entity::all() as $entity) {
-        $router->resource($entity->entity_code, 'LadminController');
+        if (\Illuminate\Support\Facades\Schema::hasTable('entities')) {
+            $router->resource($entity->entity_code, 'LadminController');
+        }
     }
     $router->resource('/entity', 'EntityController');
     $router->get('/entity/ajax/attrs', 'EntityController@getDisplayAttrsAjax');
@@ -40,5 +44,6 @@ Route::group([
 
 //Form::forget(['map', 'editor']);
 Form::extend('subForm', Extensions\FormHasMany::class);
+Form::extend('multipleSelectString', Extensions\MultipleSelectString::class);
 //Form::extend('bpmn', Extensions\Bpmn::class);
 

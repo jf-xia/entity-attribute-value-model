@@ -75,7 +75,7 @@ class LadminController extends Controller
         foreach ($attrs as $attr) {
             if (!$attr->not_list && $attr->backend_type<>'text'){
                 if (!$this->canViewAttr($attr)) continue;
-                // hasone format: {hasone/hasmany}2{entityCode}2{relationEntityAttrCode}2{anyCode}
+                // hasone format: {hasone/hasmany}  - {entityCode}2{relationEntityAttrCode}2{anyCode}
                 if ($attr->frontend_type == 'hasone' || $attr->frontend_type == 'hasmany') {
                     $attrCode = $attr->frontend_type.'2'.$attr->attribute_code.'.'.explode('2',$attr->attribute_code.'2name')[1];
                 } else {
@@ -137,6 +137,11 @@ class LadminController extends Controller
                         if (!$enitiy) continue;
                         $filter->equal($attr->attribute_code,$attr->frontend_label)->select()
                             ->ajax('/admin/entity/ajax/options?entity='.base64_encode($enitiy->entity_class).'&option='.$attrOptionsName);
+                    } elseif($ft == 'hasMany'){
+                        list($enitiy,$attrOptionsName) = $this->getHasone($attr);
+                        if (!$enitiy) continue;
+                        $filter->like($attr->attribute_code,$attr->frontend_label)->select()
+                            ->ajax('/admin/entity/ajax/options?entity='.base64_encode($enitiy->entity_class).'&option='.$attrOptionsName);
                     } elseif($ft == 'multipleSelect'|| $ft == 'checkbox'){
                         $filter->in($attr->attribute_code,$attr->frontend_label)->{$ft}($attr->options());
                     } elseif ($ft == 'datetime' || $ft == 'date' || $ft == 'time' || $ft == 'day' || $ft == 'month' || $ft == 'year'){
@@ -171,7 +176,7 @@ class LadminController extends Controller
         $content = Admin::content();
         $content->header($this->entity->entity_name.trans('eav::eav.edit'));
         $content->description($this->entity->entity_desc);
-        $content->body($this->form()->edit($id).$this->formLists());
+        $content->body($this->form()->edit($id).$this->formM2MLists().$this->formHasManyLists($id));
         return $content;
     }
 
@@ -206,7 +211,41 @@ class LadminController extends Controller
      *
      * @return Form
      */
-    protected function formLists()
+    protected function formHasManyLists($id)
+    {//2text2 project2text2iterative
+        $entityRelations = $this->entity->relation_entity_ids;
+        $tab = new Tab();
+        foreach ($entityRelations as $relation){
+            $relationEntity = Entity::findById($relation);
+            if ($relationEntityCode=$relationEntity->entity_code){
+                $relationField = $this->entity->entity_code.'2text2'.$relationEntityCode;
+                $modelClass = $relationEntity->entity_class;
+                $grid = new RelationGrid(new $modelClass(),function(RelationGrid $grid) use ($relationField,$id,$relationEntity){//
+                    $grid->model()->where($relationField,$id);
+                    $grid->id('ID')->sortable();
+                    $grid->column('',trans('eav::eav.action'))->display(function() use ($relationEntity){
+                        return '<a href="'.admin_url($relationEntity->entity_code.'/'.$this->getKey())
+                            .'/edit" target="_blank" ><i class="fa fa-edit"></i></a>';
+                        //todo 4 delete button
+                    });
+                    $this->getColumn($grid,$relationEntity->attributes);
+                    $grid->setBoxFooter('. -- 点击链接查看表单：<a href="'.admin_url($relationEntity->entity_code)
+                        .'" target="_blank" >'.$relationEntity->entity_name.'</a>');
+                });
+//            $tab->dropDown([$entity->entity_name,admin_url($entity->entity_code)]);
+                $tab->add($relationEntity->entity_name,$grid);
+            }
+        }
+        $formLists = count($entityRelations) ? new Box(trans('eav::eav.entity_relations'),$tab) : '';
+        return $formLists;
+    }
+
+    /**
+     * Make a Many to Many relation entity list below form.
+     *
+     * @return Form
+     */
+    protected function formM2MLists()
     {
         $entityRelations = $this->entity->entity_relations;
         if (!$entityRelations->count()) {
@@ -222,7 +261,7 @@ class LadminController extends Controller
 //                $grid->id('ID')->sortable();
                 $grid->column('',trans('eav::eav.action'))->display(function() use ($entity){
                     return '<a href="'.admin_url($entity->entity_code.'/'.$this->getKey())
-                    .'/edit" target="_blank" ><i class="fa fa-edit"></i></a>';
+                        .'/edit" target="_blank" ><i class="fa fa-edit"></i></a>';
                     //todo 4 delete button
                 });
                 $this->getColumn($grid,$entity_relation->first()->relation->attributes);
@@ -268,6 +307,25 @@ class LadminController extends Controller
                                     $entityClass = $enitiy->entity_class;
                                     $model = $entityClass::find($id);
                                     return $model ? [$model->id => $model->$attrOptionsName] : [];
+                                })->ajax('/admin/entity/ajax/options?entity='.base64_encode($enitiy->entity_class).'&option='.$attrOptionsName);
+                        } elseif ($attr->frontend_type == 'hasMany') {
+                            list($enitiy,$attrOptionsName) = $this->getHasone($attr);
+                            if (!$enitiy) continue;
+                            $attCode = $attr->attribute_code;
+                            $attField = $form->multipleSelectString($attCode,$attr->frontend_label)->options(
+                                function () use ($enitiy,$attrOptionsName,$attCode) {
+                                    $entityClass = $enitiy->entity_class;
+                                    $value = [];
+                                    $vals = explode(',',$this->$attCode);
+                                    if (is_array($vals)){
+                                        foreach ($vals as $val){
+                                            $model = $entityClass::find($val);
+                                            if (!empty($model)){
+                                                $value[$val] = $model->$attrOptionsName;
+                                            }
+                                        }
+                                    }
+                                    return $value;
                                 })->ajax('/admin/entity/ajax/options?entity='.base64_encode($enitiy->entity_class).'&option='.$attrOptionsName);
                         } else {
                             $attField = $form->{$attr->frontend_type}($attr->attribute_code,$attr->frontend_label);
