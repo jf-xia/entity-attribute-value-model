@@ -1,5 +1,5 @@
 <?php
-namespace Vreap\Eav\Models\Task;
+namespace Eav\Models\Task;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -24,7 +24,7 @@ class Report extends Model
      **/
     public function user()
     {
-        return $this->belongsTo(Vreap\Eav\Auth\Database\Administrator::class, 'user_id', 'id');
+        return $this->belongsTo(Eav\Auth\Database\Administrator::class, 'user_id', 'id');
     }
 
     /**

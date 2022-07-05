@@ -1,6 +1,6 @@
 <?php
 
-namespace Vreap\Eav\Models\Task;
+namespace Eav\Models\Task;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -45,7 +45,7 @@ class Status extends Model
 
     public function task()
     {
-        return $this->hasMany(\Vreap\Eav\Models\Task\Task::class, 'tasktype_id', 'id');
+        return $this->hasMany(\Eav\Models\Task\Task::class, 'tasktype_id', 'id');
     }
 
 //    protected static function boot()
